@@ -16,7 +16,7 @@ Version 0.1.0 · tested with Praat 7.0.02
 
 ## Use it
 
-- **Online:** *[link to be added]*
+- **Online:** *[https://maypychan.github.io/CART/](https://maypychan.github.io/CART/)*
 - **On your own computer, with no internet needed:** download this repository
   (**Code → Download ZIP**), unzip it, and double-click `index.html`.
 
@@ -175,14 +175,14 @@ Foundation, or Elsevier. Praat is separate software by P. Boersma and D. Weenink
 - The application operates entirely locally and does not require network access.
 
 ## Citation
-If you use CART in research, please cite both the instrument and the
-software:
-
+If you use CART in research, please cite:
+### Assessment Instrument
 - Kempster GB, Nagle KF, Solomon NP (2025). Development and rationale for
   the Consensus Auditory-Perceptual Evaluation of Voice—Revised (CAPE-Vr).
   *J Voice*. doi:10.1016/j.jvoice.2025.01.022.
+### Acoustic-analysis software
 - Boersma P, Weenink D. *Praat: doing phonetics by computer* (version used).
-- *[CART citation to be added.]*
+### CART Software
+- Chan MPY, *CART (CAPE-Vr Clinical Acoustic Reporting Tool)*. Version 1.0. GitHub repository, 2026. https://maypychan.github.io/CART/
 
-The report's methods paragraph lists the Praat version and every analysis
-setting used.
+The report's methods paragraph lists the Praat version and every analysis setting used.

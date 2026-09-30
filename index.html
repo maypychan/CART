@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CAPE-Vr Clinical Acoustic Reporting Tool (CART)</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <!-- Top bar (one compact row): the progress bar, then the session file controls.
+       Sessions are files you save and load. Hidden when printing. -->
+  <header class="app-bar">
+    <!-- Steps, in the same order as the page: 1 form, 2 acoustics (optional), 3 documentation (optional), 4 report. -->
+    <nav class="stepbar" id="stepbar" aria-label="Progress"></nav>
+    <div class="session-controls">
+      <button type="button" id="btn-new" class="bar-btn" title="New session">New</button>
+      <button type="button" id="btn-load" class="bar-btn" title="Load a session file">Load…</button>
+      <input type="file" id="file-load" accept=".json,application/json" hidden>
+      <button type="button" id="btn-save" class="bar-btn save-btn">Save<span class="save-dot" aria-hidden="true"></span></button>
+      <button type="button" id="btn-report" class="bar-btn" title="Open the printable report">Report…</button>
+    </div>
+    <span class="visually-hidden" id="save-status" aria-live="polite"></span>
+  </header>
+
+  <div class="page">
+
+    <!-- Messages (load warnings, errors) appear here. -->
+    <div id="messages" aria-live="polite"></div>
+
+    <p class="step-hint" id="step-hint"></p>
+
+    <!-- The CAPE-Vr form (blue frame): usable on its own, without any acoustic or documentation tools. -->
+    <main class="form capevr-frame" id="capevr-form">
+      <div class="frame-tag">1 · CAPE-Vr form</div>
+      <h1>Consensus Auditory-Perceptual Evaluation of Voice – Revised (CAPE-Vr)</h1>
+      <p class="source-note">Form content adapted from Kempster, Nagle &amp; Solomon (2025), <i>Journal of Voice</i>,
+        doi:10.1016/j.jvoice.2025.01.022, under CC BY 4.0. This tool is independent and is not affiliated with or
+        endorsed by the CAPE-Vr authors, ASHA, or the publisher. See “About, disclaimers, and attribution” at the bottom.</p>
+
+      <!-- 1. Header -->
+      <section class="card" aria-label="Examinee and examiner">
+        <div class="grid header-grid">
+          <label class="field span-2">Name/ID <input type="text" data-path="header.nameOrId"></label>
+          <label class="field">Gender <input type="text" data-path="header.gender"></label>
+          <label class="field">Age <input type="text" data-path="header.age"></label>
+          <label class="field span-2">Examiner <input type="text" data-path="header.examiner"></label>
+          <label class="field span-2">Date <input type="date" data-path="header.recordingDate"></label>
+        </div>
+      </section>
+
+      <!-- 2. Recording conditions -->
+      <section class="card" aria-labelledby="rec-title">
+        <h2 id="rec-title">Recording Conditions</h2>
+        <div class="row">
+          <span class="row-label">Audio recorded</span>
+          <div class="choice" data-path="recordingConditions.audioRecorded" data-options="yesNo" data-mode="single" aria-label="Audio recorded"></div>
+        </div>
+        <div class="row">
+          <span class="row-label">In person / Virtual</span>
+          <div class="choice" data-path="recordingConditions.sessionMode" data-options="sessionMode" data-mode="single" aria-label="In person or virtual"></div>
+        </div>
+        <div class="row">
+          <span class="row-label">Environment</span>
+          <div class="choice" data-path="recordingConditions.environment" data-options="environment" data-mode="single" aria-label="Environment"></div>
+        </div>
+        <div class="grid two-col">
+          <label class="field">Recording device/platform <input type="text" data-path="recordingConditions.recordingDevice"></label>
+          <label class="field narrow">Mouth-to-mic (cm) <input type="number" min="0" step="any" data-path="recordingConditions.mouthToMicCm"></label>
+        </div>
+      </section>
+
+      <!-- 3. Stimuli -->
+      <section class="card" aria-labelledby="stim-title">
+        <div class="card-head">
+          <h2 id="stim-title">Stimuli</h2>
+          <label class="switch-label"><input type="checkbox" data-path="stimuli.showStimulusText"> Show stimulus wording</label>
+        </div>
+
+        <p><b>Vowels:</b>
+          <span class="stimulus-text">/ɑ/ and /i/. Sustain each for 3–5 seconds; one or more productions in typical speaking voice.</span>
+          <span class="stimulus-hidden">/ɑ/ and /i/ (wording hidden)</span>
+        </p>
+
+        <p><b>Sentences:</b></p>
+        <ol class="sentences" type="a">
+          <li><span class="stimulus-text">The blue spot is on the key again.</span><span class="stimulus-hidden">Sentence a</span>
+            <label class="modeled"><input type="checkbox" data-path="stimuli.examinerModeled.sentence_1"> Check if the examiner modeled the sentences</label></li>
+          <li><span class="stimulus-text">He helped her hurry home.</span><span class="stimulus-hidden">Sentence b</span>
+            <label class="modeled"><input type="checkbox" data-path="stimuli.examinerModeled.sentence_2"> Check if the examiner modeled the sentences</label></li>
+          <li><span class="stimulus-text">We were away a year ago.</span><span class="stimulus-hidden">Sentence c</span>
+            <label class="modeled"><input type="checkbox" data-path="stimuli.examinerModeled.sentence_3"> Check if the examiner modeled the sentences</label></li>
+          <li><span class="stimulus-text">I eat eggs every evening.</span><span class="stimulus-hidden">Sentence d</span>
+            <label class="modeled"><input type="checkbox" data-path="stimuli.examinerModeled.sentence_4"> Check if the examiner modeled the sentences</label></li>
+          <li><span class="stimulus-text">My mama makes lemon muffins.</span><span class="stimulus-hidden">Sentence e</span>
+            <label class="modeled"><input type="checkbox" data-path="stimuli.examinerModeled.sentence_5"> Check if the examiner modeled the sentences</label></li>
+          <li><span class="stimulus-text">Papa took a piece of the cake.</span><span class="stimulus-hidden">Sentence f</span>
+            <label class="modeled"><input type="checkbox" data-path="stimuli.examinerModeled.sentence_6"> Check if the examiner modeled the sentences</label></li>
+        </ol>
+
+        <p><b>Extemporaneous Speech:</b>
+          <span class="stimulus-text">“Tell me about a place you have gone or would like to go.”</span>
+          <span class="stimulus-hidden">standard prompt (wording hidden)</span>
+        </p>
+        <label class="field">Prompt used, if different (leave blank for the standard prompt)
+          <input type="text" data-path="stimuli.extempPromptUsed"></label>
+        <label class="field">Reading Passage (optional): Specify
+          <input type="text" data-path="stimuli.readingPassage"></label>
+      </section>
+
+      <!-- 4. Rating conditions -->
+      <section class="card" aria-labelledby="ratecond-title">
+        <h2 id="ratecond-title">Rating Conditions</h2>
+        <div class="row">
+          <span class="row-label">Live voice / Recorded voice</span>
+          <div class="choice" data-path="ratingConditions.ratingSource" data-options="ratingSource" data-mode="single" aria-label="Live or recorded voice"></div>
+        </div>
+        <div class="row">
+          <span class="row-label">Headphones / Speakers</span>
+          <div class="choice" data-path="ratingConditions.playback" data-options="playback" data-mode="single" aria-label="Headphones or speakers"></div>
+        </div>
+        <div class="row">
+          <span class="row-label">Auditory anchors</span>
+          <div class="choice" data-path="ratingConditions.auditoryAnchors" data-options="yesNo" data-mode="single" aria-label="Auditory anchors"></div>
+        </div>
+        <div class="grid three-col">
+          <label class="field">Rater <input type="text" data-path="ratingConditions.rater"></label>
+          <label class="field">Date <input type="date" data-path="ratingConditions.ratingDate"></label>
+          <label class="field">Number of times sample was played <input type="number" min="0" step="1" data-path="ratingConditions.timesPlayed" data-integer></label>
+        </div>
+      </section>
+
+      <!-- 5. Visual analog scales -->
+      <section class="card" aria-labelledby="vas-title">
+        <h2 id="vas-title" class="visually-hidden">Visual analog scales</h2>
+        <div class="vas-options">
+          <label class="switch-label"><input type="checkbox" data-path="vas.showNumbers"> Show numerical values</label>
+        </div>
+        <!-- Direction words over the line ends. The hidden score box and button
+             only reserve the same space as in the rows below, so the words line up. -->
+        <div class="vas-head" aria-hidden="true">
+          <span></span>
+          <div class="vas">
+            <span class="vas-ends"><span>Normal</span><span>Extreme</span></span>
+            <span class="vas-score ghost"><input type="number" class="vas-number" tabindex="-1" disabled>/100</span>
+            <button type="button" class="vas-clear ghost" tabindex="-1" disabled>Clear</button>
+          </div>
+        </div>
+        <div class="vas-row"><span class="vas-label">Overall Severity</span><div class="vas" data-path="vas.overallSeverity" data-label="Overall Severity"></div></div>
+        <div class="vas-row"><span class="vas-label">Roughness</span><div class="vas" data-path="vas.roughness" data-label="Roughness"></div></div>
+        <div class="vas-row"><span class="vas-label">Breathiness</span><div class="vas" data-path="vas.breathiness" data-label="Breathiness"></div></div>
+        <div class="vas-row"><span class="vas-label">Strain</span><div class="vas" data-path="vas.strain" data-label="Strain"></div></div>
+        <div class="vas-row">
+          <span class="vas-label"><input type="text" class="extra-label" data-path="vas.extra.label" aria-label="Name of the additional attribute" placeholder="(other attribute)"></span>
+          <div class="vas" data-path="vas.extra.score" data-label="Additional attribute"></div>
+        </div>
+        <!-- Further attributes added by the examiner (not on the paper form). -->
+        <div id="vas-additional"></div>
+        <button type="button" id="btn-add-attr" class="small add-attr">+ Add attribute</button>
+        <p class="hint">Click or drag on a line to place the mark (or type the score when numerical values are shown). Keyboard: arrow keys move by 1, Page Up/Down by 10. “Clear” returns a scale to not rated. Scores are always saved, whether or not the numbers are shown.</p>
+      </section>
+
+      <!-- 6. Descriptive ratings (more than one option may be chosen) -->
+      <section class="card" aria-label="Pitch, loudness, resonance, nasality">
+        <div class="desc-row">
+          <span class="row-label"><b>Pitch:</b></span>
+          <div class="choice" data-path="descriptive.pitch.selected" data-options="pitch" data-mode="multi" aria-label="Pitch"></div>
+          <label class="field inline">Comment: <input type="text" data-path="descriptive.pitch.comment"></label>
+        </div>
+        <div class="desc-row">
+          <span class="row-label"><b>Loudness:</b></span>
+          <div class="choice" data-path="descriptive.loudness.selected" data-options="loudness" data-mode="multi" aria-label="Loudness"></div>
+          <label class="field inline">Comment: <input type="text" data-path="descriptive.loudness.comment"></label>
+        </div>
+        <div class="desc-row">
+          <span class="row-label"><b>Resonance:</b></span>
+          <div class="choice" data-path="descriptive.resonance.selected" data-options="resonance" data-mode="multi" aria-label="Resonance"></div>
+          <label class="field inline">Comment: <input type="text" data-path="descriptive.resonance.comment"></label>
+        </div>
+        <div class="desc-row">
+          <span class="row-label"><b>Nasality:</b></span>
+          <div class="choice" data-path="descriptive.nasality.selected" data-options="nasality" data-mode="multi" aria-label="Nasality"></div>
+          <label class="field inline">Comment: <input type="text" data-path="descriptive.nasality.comment"></label>
+        </div>
+      </section>
+
+      <!-- 7. Inconsistencies -->
+      <section class="card" aria-labelledby="incons-title">
+        <div class="row">
+          <h2 id="incons-title" class="row-label inline-heading">Inconsistencies:</h2>
+          <div class="choice" data-path="inconsistencies.status" data-options="inconsistency" data-mode="single" aria-label="Inconsistencies"></div>
+          <span class="muted">(describe)</span>
+        </div>
+        <label class="field line"><i>Vowels:</i> <input type="text" data-path="inconsistencies.vowels"></label>
+        <label class="field line"><i>Sentences:</i> <input type="text" data-path="inconsistencies.sentences"></label>
+        <label class="field line"><i>Extemporaneous speech:</i> <input type="text" data-path="inconsistencies.extemporaneous"></label>
+      </section>
+
+      <!-- 8. Instabilities and 9. Additional features -->
+      <section class="card" aria-label="Instabilities and additional features">
+        <div class="row wrap">
+          <h2 class="row-label inline-heading">Instabilities:</h2>
+          <div class="choice" data-path="instabilities.selected" data-options="instabilities" data-mode="multi" aria-label="Instabilities"></div>
+          <label class="field inline">other: <input type="text" data-path="instabilities.other"></label>
+        </div>
+        <div class="row wrap">
+          <h2 class="row-label inline-heading">Additional features:</h2>
+          <div class="choice" data-path="additionalFeatures.selected" data-options="features" data-mode="multi" aria-label="Additional features"></div>
+        </div>
+        <label class="field line">other: <input type="text" data-path="additionalFeatures.other"></label>
+      </section>
+
+      <!-- 10. Overall impression -->
+      <section class="card" aria-labelledby="impression-title">
+        <label class="field">
+          <h2 id="impression-title" class="inline-heading">Overall Impression:</h2>
+          <textarea rows="3" data-path="overallImpression"></textarea>
+        </label>
+      </section>
+
+
+      <!-- Instructions: collapsed by default; click to expand.
+           Table 1 of Kempster, Nagle & Solomon (2025), word for word as supplied by the user
+           (CC BY 4.0), formatted into sections. Notes marked "Note for this app" are ours. -->
+      <details class="instructions card">
+        <summary>CAPE-Vr instructions: administration and scoring (click to show / hide)</summary>
+        <p class="source-note">Table 1. CAPE-Vr Protocol: Instructions for Administration and Scoring. From Kempster GB, Nagle KF,
+          Solomon NP. Development and Rationale for the Consensus Auditory-Perceptual Evaluation of Voice—Revised (CAPE-Vr).
+          <i>Journal of Voice</i> (2025). doi:10.1016/j.jvoice.2025.01.022. © 2025 The Authors. Published by Elsevier Inc. on
+          behalf of The Voice Foundation. Reproduced under the Creative Commons Attribution (CC BY 4.0) license
+          (creativecommons.org/licenses/by/4.0). The text is unchanged; it has only been formatted into sections, and the notes
+          marked “Note for this app” have been added.</p>
+
+        <h3>Demographics</h3>
+        <p>Complete identifying information about the examinee (Name or ID, Gender, Age), examiner (Name), and date of recording as indicated at the top of the form.</p>
+
+        <h3>Recording Conditions</h3>
+        <p>Seat the examinee comfortably in a quiet environment. Place a microphone at a fixed mouth-to-microphone distance and audio record the voice and speech stimuli. Note on the form whether the stimuli were audio recorded or not; whether the examination was in person or virtual; the room environment; the recording device and/or platform; and the mouth-to-microphone distance.</p>
+
+        <h3>Tasks and Stimuli</h3>
+        <p>The three primary tasks for the CAPE-Vr may be completed in any order.</p>
+        <p><i>Vowels.</i> Instruct the examinee to say the vowels /ɑ/ and /i/ using a typical speaking voice. Each vowel should be sustained for 3-5 seconds. A single trial of each vowel is adequate if the production sounds representative of that individual’s speaking voice. Modeling is discouraged to avoid imitation of the clinician’s pitch and voice quality.</p>
+        <p><i>Sentences.</i> Instruct the examinee to read the following sentences aloud in their typical speaking voice. The sentences can be printed out in large, easy-to-read font. If the individual has difficulty reading, the clinician may model the sentences; in this case, check the box provided to the right of the sentences on the CAPE-Vr form.</p>
+        <p class="app-note">Note for this app: there is one check box after each sentence, so modeling can be recorded for each sentence separately.</p>
+        <p>The sentences (and their primary features of interest) follow:</p>
+        <ol class="instruction-sentences" type="a">
+          <li>The blue spot is on the key again. (English corner vowels)</li>
+          <li>He helped her hurry home. (Word-initial /h/)</li>
+          <li>We were away a year ago. (All voiced phonemes)</li>
+          <li>I eat eggs every evening. (Vowel-initial words)</li>
+          <li>My mama makes lemon muffins. (Nasal consonants)</li>
+          <li>Papa took a piece of the cake. (High-pressure consonants)</li>
+        </ol>
+        <p><i>Extemporaneous speech.</i> Elicit at least 20 seconds of natural speech with the prompt: “Tell me about a place you have gone or would like to go.” Another prompt that elicits content unrelated to voice use is also acceptable.</p>
+        <p class="app-note">Note for this app: if another prompt is used, record it in “Prompt used, if different”.</p>
+        <p><i>Reading passage (optional).</i> Indicate the reading passage if one is included as part of the auditory-perceptual evaluation of voice.</p>
+
+        <h3>Rating Conditions</h3>
+        <p>Ratings are expected to be based on recordings of the voice, but the rater can indicate if they were completed on live voice in real time instead. When rating voice recordings, listen to the stimuli as many times as desired and document the number of repetitions. Also indicate: the use headphones or speakers; the use of standard samples of disordered voices as auditory anchors (ie, reference samples); the identity of the rater; and the date.</p>
+
+        <h3>Voice Characteristics and Ratings</h3>
+        <h4>Attributes Rated along Visual Analog Scales (VASs)</h4>
+        <p>The salient perceptual vocal attributes included in the CAPE-V and CAPE-Vr were identified by the original consensus committee authors as commonly used and easily understood: Overall Severity, Roughness, Breathiness, and Strain. These vocal attributes are generally defined as follows:</p>
+        <ul class="definitions">
+          <li><i>Overall Severity:</i> global, integrated impression of deviation from normal voice</li>
+          <li><i>Roughness:</i> perceived irregularity in the voicing source</li>
+          <li><i>Breathiness:</i> perceived air escape in the voice</li>
+          <li><i>Strain:</i> perceived vocal effort, tension, or press</li>
+        </ul>
+        <p>Each of these perceptual attributes is accompanied by a 100-mm line forming a VAS. One blank VAS is included on the form if the examiner prefers to rate an additional attribute on a continuous scale. The words “Normal” and “Extreme” appear above the lines on the left and right sides, respectively, to indicate the direction of the perceptual ratings.</p>
+        <p>The examiner marks the degree of perceived deviance for each attribute with a small vertical line (aka a ‘tick mark’). The examiner may mark each VAS at any location.</p>
+        <p><i>Scoring VASs.</i> After marking each of the VASs, measure the distance (in mm) from the left end of the line to the tick mark. Write the value in the blank space to the right of the line. Confirm that the lines are 100 mm long; if not, cross out 100 and insert the actual length of the line. Corrections can be made by dividing the distance measured by the length of the line and multiplying that result by 100.</p>
+        <p class="app-note">Note for this app: measuring in millimetres does not apply here. The app scores each line directly: the position of the tick mark is recorded as a whole number from 0 (left end) to 100 (right end) and shown in the box to the right of the line.</p>
+
+        <h4>Attributes Rated Descriptively</h4>
+        <p>Options are provided for auditory-perceptual judgments of pitch, loudness, resonance, and nasality, inconsistencies, instabilities, and additional features, with room for examiner comments. Examiners may select one or more options per attribute.</p>
+        <ul class="definitions">
+          <li><i>Pitch:</i> perceived average pitch of the voice, as Normal, Low, or High. Pitch variability may be noted separately under Inconsistencies or Instabilities.</li>
+          <li><i>Loudness:</i> perceived average loudness or sound level of the voice, as Normal, Quiet, or Loud. Loudness variability may be noted separately under Inconsistencies or Instabilities.</li>
+          <li><i>Resonance:</i> perceived focus of the sound within the oral cavity, as Normal, Front (forward or “in the mask”), and Back (pharyngeal or “throaty”).</li>
+          <li><i>Nasality:</i> perceived balance of oral and nasal resonance reflecting patency of the nasal passageways and velopharyngeal function, as Normal, Hyponasal, or Hypernasal.</li>
+          <li><i>Inconsistencies:</i> Indicate and describe inconsistencies of voice according to task. If there are no notable inconsistencies, circle None. If there are, circle Present and provide a description of the inconsistencies.</li>
+          <li><i>Instabilities:</i> If relevant, circle one or more categorical descriptors of vocal instabilities from the options provided or add another term to indicate vocal instabilities.</li>
+          <li><i>Additional features:</i> If relevant, select one or more descriptors from the options provided or list alternate descriptors.</li>
+          <li><i>Overall impression:</i> State the overall severity of the voice problem and describe the voice in a few words or phrases.</li>
+        </ul>
+        <p class="app-note">Note for this app: “circle” means click the option; click it again to un-choose it.</p>
+      </details>
+
+      <p class="footer-note">Sessions are saved only as files you download (Save) and open again later
+        (Load…). Nothing is stored in the browser, and nothing is sent anywhere.</p>
+    </main>
+
+    <!-- OPTIONAL MODULE: acoustic analysis with Praat (recordings, package, results). -->
+    <details class="module" id="module-acoustic">
+      <summary class="module-head"><span class="module-title">2 · Acoustic analysis with Praat</span> <span class="optional-tag">optional</span>
+        <span class="module-hint">upload recordings → make the Praat package → run it in Praat → import the results</span></summary>
+      <div class="module-body">
+    <!-- Recordings and the Praat package -->
+    <section class="card recordings" id="recordings" aria-labelledby="rec-list-title">
+      <div class="card-head">
+        <h2 id="rec-list-title">Recordings</h2>
+        <div>
+          <button type="button" id="btn-add-wav">Add WAV files…</button>
+          <input type="file" id="wav-input" accept=".wav,.wave,audio/wav,audio/x-wav" multiple hidden>
+        </div>
+      </div>
+      <p class="hint">Drag WAV files here or use “Add WAV files…”. Each file gets a CAPE-Vr task, suggested from its
+        file name; please check it. The app only reads each file’s duration, sample rate, channels, and bit depth.
+        All acoustic measures come from Praat. The audio is not stored in the session file: after loading a
+        session, add the same files again to play or export them.</p>
+      <div id="recordings-list" class="recordings-list"></div>
+
+      <h3>Speaker and analysis settings</h3>
+      <div class="row">
+        <span class="row-label">Speaker profile</span>
+        <div class="choice" data-path="audio.speakerProfile" data-options="profiles" data-mode="single" data-collapse-after="3" aria-label="Speaker profile"></div>
+      </div>
+      <div class="grid settings-grid">
+        <label class="field">Speaker ID for file names
+          <input type="text" id="speaker-id-files" data-path="audio.speakerIdForFiles">
+          <span id="speaker-id-note" class="field-note"></span></label>
+        <label class="field">Pitch floor (Hz)
+          <input type="number" min="1" step="any" data-path="audio.pitchFloorHz"></label>
+        <label class="field">Pitch ceiling (Hz)
+          <input type="number" min="1" step="any" data-path="audio.pitchCeilingHz"></label>
+        <label class="field">Formant ceiling (Hz)
+          <input type="number" min="1" step="any" data-path="audio.formantCeilingHz"></label>
+      </div>
+      <p class="hint">Choosing a profile fills in its pitch and formant values; you can change them. These values only set
+        the ranges Praat searches in (analysis settings); they are not norms or expected values for the speaker.
+        <span id="pitch-override-note" class="override-note"></span> <span id="formant-override-note" class="override-note"></span></p>
+
+      <details class="advanced">
+        <summary>Advanced analysis settings (optional)</summary>
+        <div class="row"><span class="row-label">CPPS method</span>
+          <div class="choice" data-path="audio.advanced.cppsMethod" data-options="cppsMethod" data-mode="single" data-required aria-label="CPPS method"></div></div>
+        <div class="row"><span class="row-label">CPPS on speech: voiced parts only</span>
+          <div class="choice" data-path="audio.advanced.cppsSpeechVoicedOnly" data-options="yesNo" data-mode="single" data-required aria-label="CPPS voiced only"></div></div>
+        <div class="row"><span class="row-label">Intensity on speech: voiced parts only</span>
+          <div class="choice" data-path="audio.advanced.intensitySpeechVoicedOnly" data-options="yesNo" data-mode="single" data-required aria-label="Intensity voiced only"></div></div>
+        <div class="row"><span class="row-label">Intensity averaging</span>
+          <div class="choice" data-path="audio.advanced.intensityAveraging" data-options="intensityAvg" data-mode="single" data-required aria-label="Intensity averaging"></div></div>
+        <div class="row"><span class="row-label">HNR method</span>
+          <div class="choice" data-path="audio.advanced.hnrMethod" data-options="hnrMethod" data-mode="single" data-required aria-label="HNR method"></div></div>
+        <div class="row"><span class="row-label">Jitter measures</span>
+          <div class="choice" data-path="audio.advanced.jitterMeasures" data-options="jitter" data-mode="multi" aria-label="Jitter measures"></div></div>
+        <div class="row"><span class="row-label">Shimmer measures</span>
+          <div class="choice" data-path="audio.advanced.shimmerMeasures" data-options="shimmer" data-mode="multi" aria-label="Shimmer measures"></div></div>
+        <div class="row"><span class="row-label">Jitter/shimmer period range</span>
+          <div class="choice" data-path="audio.advanced.periodRangeMode" data-options="periodRange" data-mode="single" data-required aria-label="Period range"></div></div>
+        <div class="row"><span class="row-label">Formants</span>
+          <div class="choice" data-path="audio.advanced.formantWindow" data-options="formantWindow" data-mode="single" data-required aria-label="Formant window"></div></div>
+        <div class="row"><span class="row-label">Stereo files</span>
+          <div class="choice" data-path="audio.advanced.channelHandling" data-options="channels" data-mode="single" data-required aria-label="Stereo files"></div></div>
+        <div class="grid three-col">
+          <label class="field">Vowel window (s): middle of the voiced part
+            <input type="number" min="0.1" step="any" data-path="audio.advanced.vowelWindowSec"></label>
+          <label class="field">Short vowels: fraction of the voiced part
+            <input type="number" min="0.05" max="1" step="any" data-path="audio.advanced.vowelShortFraction"></label>
+          <label class="field">Number of formants tracked
+            <input type="number" min="3" step="any" data-path="audio.advanced.formantCount"></label>
+        </div>
+        <p class="hint">Every setting is written into the package and echoed in results.json, and the report’s methods paragraph lists the settings used.</p>
+      </details>
+
+      <div class="export-bar" id="export-bar">
+        <button type="button" id="btn-export" class="primary">Make Praat package…</button>
+        <span id="export-summary" class="export-summary"></span>
+        <span id="export-last" class="muted"></span>
+        <span id="script-version" class="muted script-version"></span>
+      </div>
+      <p class="notice" data-notice="ACOUSTIC_SHORT"></p>
+    </section>
+
+    <!-- Acoustic results from Praat. -->
+    <section class="card" id="acoustics-panel" aria-labelledby="acoustics-title">
+      <div class="card-head">
+        <h2 id="acoustics-title">Acoustic results (from Praat)</h2>
+        <div>
+          <button type="button" id="btn-import">Import results.json…</button>
+          <input type="file" id="results-input" accept=".json,application/json" hidden>
+        </div>
+      </div>
+      <p id="acoustics-status" class="hint"></p>
+      <div id="acoustics-warnings"></div>
+      <div id="acoustics-results" class="acoustics-results"></div>
+      <p class="notice" data-notice="ACOUSTIC_SHORT"></p>
+    </section>
+      </div>
+    </details>
+
+    <!-- Export confirmation -->
+    <dialog id="export-dialog" aria-labelledby="export-dialog-title">
+      <h2 id="export-dialog-title">Make the Praat package</h2>
+      <div id="export-dialog-body"></div>
+      <div class="dialog-buttons">
+        <button type="button" id="export-cancel">Cancel</button>
+        <button type="button" id="export-confirm" class="primary">Download package</button>
+      </div>
+    </dialog>
+
+    <!-- OPTIONAL MODULE (step 3): documentation tools (rules, statements, summary, EMR draft, CSV). -->
+    <details class="module" id="module-docs" open>
+      <summary class="module-head"><span class="module-title">3 · Documentation tools</span> <span class="optional-tag">optional</span>
+        <span class="module-hint">clinical summary, EMR draft, CSV, clinic-defined rules</span></summary>
+      <div class="module-body">
+      <!-- Documentation: a configurable report generator, not decision support.
+           A separate step below the rating form. Always editable; the texts can be
+           copied only after the session has been saved once. -->
+      <section class="card documentation" id="documentation" aria-labelledby="doc-title">
+        <div class="card-head">
+          <h2 id="doc-title">Documentation</h2>
+          <div class="doc-actions">
+            <button type="button" id="btn-rules-load">Load rules file…</button>
+            <input type="file" id="rules-input" accept=".json,application/json" hidden>
+            <button type="button" id="btn-rules-save">Save rules file</button>
+            <button type="button" id="btn-csv">Export CSV</button>
+            <label class="muted"><input type="checkbox" id="csv-deidentify"> CSV without names</label>
+          </div>
+        </div>
+        <p class="notice" data-notice="CSV_SHORT"></p>
+
+        <details class="doc-section" open>
+          <summary>Statements from your clinic’s rules <span class="muted">(ticked statements are included in the Clinical Summary and EMR draft; click “why?” to see the rule and value)</span></summary>
+          <div id="doc-statements"></div>
+        </details>
+
+        <details class="doc-section" open>
+          <summary>Clinical Summary</summary>
+          <div id="doc-summary"></div>
+        </details>
+
+        <details class="doc-section" open>
+          <summary>EMR Documentation Draft</summary>
+          <div id="doc-emr"></div>
+        </details>
+
+        <details class="doc-section">
+          <summary>Interpretation Rules <span class="muted">(clinic-defined; all start empty)</span></summary>
+          <div class="doc-warning">
+            <p><b>Clinic-defined rules, not part of the CAPE-Vr.</b> Categories and reference statements here come only
+              from rules your clinic sets. The CAPE-Vr removed the mild/moderate/severe labels from the rating form on
+              purpose, because such labels act as anchors and bias ratings (Kempster, Nagle &amp; Solomon, 2025,
+              Modification 1). No published cut-offs are implied, and any example numbers are placeholders only.
+              Nothing here is a diagnosis. Every generated line shows the value and the rule behind it.</p>
+          </div>
+          <div id="rules-editor"></div>
+        </details>
+      </section>
+      </div>
+    </details>
+
+    <!-- Step 4: the printable report (the CAPE-Vr form filled in, the acoustic results, the Clinical Summary and EMR draft). -->
+    <section class="report-card" id="report-section" aria-labelledby="report-card-title">
+      <div class="frame-tag">4 · Report</div>
+      <h2 id="report-card-title" class="visually-hidden">Generate and print report</h2>
+      <p>The report is the CAPE-Vr form filled in, followed by the acoustic results and methods (if imported), and the
+        Clinical Summary and EMR draft. It opens as a print view: use “Print / Save as PDF” there.</p>
+      <button type="button" id="btn-report-2" class="report-btn">Generate and print report…</button>
+    </section>
+
+    <!-- Old rules that were switched off: keep or delete each (see js/rules.js). -->
+    <dialog id="rules-disabled-dialog" aria-labelledby="rules-disabled-title">
+      <h2 id="rules-disabled-title">Rules that were switched off</h2>
+      <div id="rules-disabled-body"></div>
+      <div class="dialog-buttons">
+        <button type="button" id="rules-disabled-keep-all">Keep all</button>
+        <button type="button" id="rules-disabled-delete-all">Delete all</button>
+        <button type="button" id="rules-disabled-apply" class="primary">Apply</button>
+      </div>
+    </dialog>
+
+    <!-- About, disclaimers, and attribution (text from js/notices.js) -->
+    <p class="intended-use">Documentation and reporting aid. It does not diagnose and does not replace clinical judgment.</p>
+    <details class="about card" id="about" open>
+      <summary>About, disclaimers, and attribution</summary>
+      <div id="about-body"></div>
+    </details>
+  </div>
+
+  <!-- Floating player: the loaded recordings, playable while rating the form. -->
+  <aside class="float-player" id="float-player" aria-label="Recordings player" hidden>
+    <div class="fp-head">
+      <b>Recordings</b>
+      <button type="button" id="fp-toggle" class="small" aria-expanded="true">Hide</button>
+    </div>
+    <div class="fp-list" id="fp-list"></div>
+  </aside>
+
+  <!-- Report view: replaces the form on screen; printed with the browser. -->
+  <div id="report-view" hidden>
+    <div class="report-toolbar">
+      <button type="button" id="report-back">← Back to the form</button>
+      <button type="button" id="report-print" class="primary">Print / Save as PDF</button>
+      <span class="toolbar-group">Include:
+        <label><input type="checkbox" id="report-include-summary" checked> Clinical Summary</label>
+        <label><input type="checkbox" id="report-include-emr" checked> EMR draft</label></span>
+      <!-- Privacy options and their note, kept together. Each option works on its own. -->
+      <fieldset class="toolbar-privacy">
+        <legend>Privacy</legend>
+        <label><input type="checkbox" id="report-deidentify"> Hide names
+          <span class="muted">(Name/ID → speaker code; hide original file names)</span></label>
+        <label><input type="checkbox" id="report-remove-staff"> Hide examiner and rater</label>
+        <p class="muted" id="report-code-note" hidden>No separate speaker code is set, so Name/ID and the file names made from it
+          are shown as [removed] / [ID]. To show a code instead, type a “Speaker ID for file names” in step 2.</p>
+        <p class="muted">Hides selected fields only; this is not a full de-identification. Dates, age, gender, and free
+          text (including the Clinical Summary and EMR draft) are unchanged: check them before sharing.</p>
+      </fieldset>
+    </div>
+    <article id="report" class="report"></article>
+  </div>
+
+  <!-- Scripts: plain script tags, in this order (no modules, so the page works from a double-click). -->
+  <script src="js/session.js"></script>
+  <script src="js/notices.js"></script>
+  <script src="js/praat_script.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/import.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/summary.js"></script>
+  <script src="js/form.js"></script>
+</body>
+</html>

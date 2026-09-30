@@ -1,0 +1,18 @@
+# Never commit recordings, sessions, results, exports, or packages:
+# they can contain patient data.
+*.wav
+*.wave
+*.flac
+*.mp3
+*_capevr_*.json
+*_capevr_*.csv
+*_praat_package.zip
+results.json
+cape_settings.tsv
+
+# Operating-system and editor clutter
+Thumbs.db
+desktop.ini
+.DS_Store
+~$*
+.Rhistory

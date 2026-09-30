@@ -1,0 +1,572 @@
+/*
+ * app.css: styles for the CAPE-Vr Clinical Acoustic Reporting Tool (CART).
+ * System fonts only (no downloads). Neutral colors; nothing is colored by
+ * severity. The accent color only shows which options are selected.
+ */
+
+:root {
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --ink: #1f2429;
+  --muted: #5f6873;
+  --line: #d4d9df;
+  --line-strong: #8a939d;
+  --accent: #2c5a85;
+  --accent-soft: #e6eef6;
+  --warn-bg: #fff6e0;
+  --warn-line: #d9b44a;
+  --error-bg: #fdecec;
+  --error-line: #c94a4a;
+  --radius: 8px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+h1 { font-size: 1.3rem; margin: 0 0 0.2rem; }
+h2 { font-size: 1.02rem; margin: 0 0 0.6rem; }
+p { margin: 0.4rem 0; }
+
+button, input, textarea { font: inherit; color: inherit; }
+
+button {
+  cursor: pointer;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  border-radius: 6px;
+  padding: 0.35rem 0.8rem;
+}
+button:hover { border-color: var(--ink); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover { background: #234a6e; }
+
+:focus-visible { outline: 3px solid #7aa7d4; outline-offset: 2px; }
+
+input[type="text"], input[type="number"], input[type="date"], textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  background: #fff;
+}
+textarea { resize: vertical; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.muted { color: var(--muted); }
+
+/* ---------- Top bar ---------- */
+
+/* One compact row, about 44 px: progress bar on the left, session buttons on the right. */
+.app-bar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 0.8rem;
+  min-height: 44px; padding: 0 0.8rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.session-controls { display: flex; gap: 0.1rem; margin-left: auto; flex-shrink: 0; }
+.bar-btn {
+  position: relative;
+  border: 1px solid transparent; background: none; border-radius: 6px;
+  padding: 0.2rem 0.55rem; font-size: 0.88rem; color: var(--accent); font-weight: 600;
+}
+.bar-btn:hover { border-color: var(--line); background: var(--accent-soft); }
+/* Save status: a dot on the Save button (details in its tooltip). */
+.save-dot { display: none; position: absolute; top: 2px; right: 1px; width: 7px; height: 7px; border-radius: 50%; }
+.save-btn.is-dirty .save-dot { display: block; background: #c77700; }
+.save-btn.is-saved .save-dot { display: block; background: #3f8f5a; }
+
+/* ---------- Page ---------- */
+
+.page { max-width: 900px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+
+.source-note, .footer-note, .hint { color: var(--muted); font-size: 0.85rem; }
+.footer-note { margin-top: 1.5rem; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  margin: 0.8rem 0;
+}
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+
+/* ---------- Messages ---------- */
+
+.message {
+  position: relative;
+  border: 1px solid var(--warn-line);
+  background: var(--warn-bg);
+  border-radius: var(--radius);
+  padding: 0.6rem 6rem 0.6rem 0.9rem;
+  margin: 0.6rem 0;
+}
+.message.error { border-color: var(--error-line); background: var(--error-bg); }
+.message p { font-size: 0.9rem; }
+.message-close { position: absolute; top: 0.5rem; right: 0.6rem; font-size: 0.85rem; padding: 0.15rem 0.5rem; }
+
+/* ---------- Form layout ---------- */
+
+.grid { display: grid; gap: 0.6rem 1rem; }
+.header-grid { grid-template-columns: repeat(4, 1fr); }
+.two-col { grid-template-columns: 1fr 180px; margin-top: 0.5rem; }
+.three-col { grid-template-columns: 1fr 180px 1fr; margin-top: 0.5rem; }
+.span-2 { grid-column: span 2; }
+
+.field { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; color: var(--muted); margin: 0.3rem 0; }
+.field input, .field textarea { color: var(--ink); font-size: 15px; }
+.field.inline { flex-direction: row; align-items: center; gap: 0.5rem; flex: 1; min-width: 200px; margin: 0; }
+.field.line { flex-direction: row; align-items: center; gap: 0.5rem; }
+.field.line i { white-space: nowrap; color: var(--ink); }
+
+.row { display: flex; align-items: center; gap: 0.5rem 1rem; margin: 0.45rem 0; flex-wrap: wrap; }
+.row-label { min-width: 11rem; font-size: 0.95rem; }
+.inline-heading { font-size: 0.95rem; margin: 0; font-weight: 600; }
+
+/* ---------- Option buttons ---------- */
+
+.choice { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.option {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0.25rem 0.8rem;
+  background: #fff;
+}
+.option[aria-pressed="true"] {
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+  padding: calc(0.25rem - 1px) calc(0.8rem - 1px);
+  font-weight: 600;
+}
+
+/* ---------- Stimuli ---------- */
+
+.sentences { margin: 0.2rem 0 0.8rem 1.4rem; padding: 0; }
+.sentences li { margin: 0.25rem 0; }
+.modeled { margin-left: 0.8rem; font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.switch-label { font-size: 0.9rem; color: var(--muted); }
+.stimulus-hidden { display: none; color: var(--muted); font-style: italic; }
+.hide-stimulus-text .stimulus-text { display: none; }
+.hide-stimulus-text .stimulus-hidden { display: inline; }
+
+/* ---------- Visual analog scales ---------- */
+
+.vas-head, .vas-row {
+  display: grid;
+  grid-template-columns: 10.5rem 1fr;
+  align-items: center;
+  gap: 0.8rem;
+}
+.vas-row { margin: 0.35rem 0; }
+.vas-row .vas-label { font-weight: 600; }
+.extra-label { font-weight: 400; }
+
+/* The scale itself: line | score | Clear */
+.vas { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0.8rem; }
+
+/* "Normal" and "Extreme" over the ends of the lines. */
+.vas-head { font-size: 0.85rem; color: var(--muted); }
+.vas-ends { display: flex; justify-content: space-between; padding: 0 12px; }
+.ghost { visibility: hidden; }
+
+.vas-track {
+  position: relative;
+  height: 36px;
+  padding: 0 12px;          /* room to grab the ends of the line */
+  cursor: pointer;
+  touch-action: none;       /* dragging should not scroll the page */
+  border-radius: 4px;
+}
+.vas-line {
+  position: absolute; left: 12px; right: 12px; top: 50%;
+  height: 2px; background: var(--ink);
+}
+/* Short end caps, like the printed line */
+.vas-line::before, .vas-line::after {
+  content: ""; position: absolute; top: -5px; width: 2px; height: 12px; background: var(--ink);
+}
+.vas-line::before { left: 0; }
+.vas-line::after { right: 0; }
+
+/* The rater's tick mark */
+.vas-mark {
+  position: absolute; top: -13px;
+  width: 3px; height: 28px; margin-left: -1.5px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.vas-mark[hidden] { display: none; }
+
+.vas-score { display: inline-flex; align-items: center; gap: 0.2rem; white-space: nowrap; }
+.vas-number { width: 4.2rem !important; text-align: right; }
+.vas-clear { font-size: 0.85rem; padding: 0.2rem 0.6rem; }
+
+/* Added attributes: name field + remove button in the label column. */
+.vas-added .vas-label { display: flex; align-items: center; gap: 0.3rem; }
+.vas-remove { font-size: 0.8rem; padding: 0.1rem 0.4rem; flex-shrink: 0; }
+.add-attr { margin: 0.2rem 0 0.4rem; }
+
+/* ---------- Descriptive ratings ---------- */
+
+.desc-row {
+  display: grid;
+  grid-template-columns: 7rem auto 1fr;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0.45rem 0;
+}
+
+/* ---------- Recordings ---------- */
+
+.recordings.is-dragover { outline: 3px dashed var(--accent); outline-offset: -6px; background: var(--accent-soft); }
+.recordings h3 { font-size: 0.98rem; margin: 1.1rem 0 0.4rem; }
+.recordings-list { margin: 0.6rem 0; }
+
+.rec-row {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) 1fr 200px auto;
+  grid-template-areas: "info info task remove" "player export export export" "notes notes notes notes";
+  gap: 0.2rem 0.8rem;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  margin: 0.4rem 0;
+}
+.rec-row.has-error { border-color: var(--error-line); }
+.rec-player { grid-area: player; display: flex; flex-direction: column; gap: 0.15rem; }
+.rec-player audio { width: 100%; height: 32px; }
+.play-count { font-size: 0.78rem; color: var(--muted); }
+.rec-info { grid-area: info; min-width: 0; }
+.rec-name { font-weight: 600; overflow-wrap: anywhere; }
+.rec-meta { font-size: 0.85rem; color: var(--muted); }
+.rec-task { grid-area: task; display: flex; flex-direction: column; gap: 0.15rem; }
+.rec-task select { width: 100%; padding: 0.3rem; border: 1px solid var(--line-strong); border-radius: 6px; background: #fff; font: inherit; }
+.rec-export { grid-area: export; font-size: 0.85rem; }
+.rec-export code { background: var(--bg); padding: 0.05rem 0.3rem; border-radius: 4px; }
+.rec-remove { grid-area: remove; font-size: 0.85rem; padding: 0.2rem 0.6rem; }
+.rec-notes { grid-area: notes; margin: 0.2rem 0 0; padding-left: 1.2rem; font-size: 0.85rem; }
+.rec-notes .is-error { color: #9b2c2c; }
+.rec-notes .is-warning { color: #7a5b00; }
+.badge { font-size: 0.75rem; color: var(--accent); }
+
+.settings-grid { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
+.override-note { color: var(--accent); font-weight: 600; }
+.field-note { font-size: 0.8rem; color: #7a5b00; }
+.extra-option { display: none; }
+.show-extra .extra-option { display: inline-block; }
+.more-options { border: none; background: none; color: var(--accent); text-decoration: underline; padding: 0.25rem 0.4rem; }
+
+.advanced { margin: 0.8rem 0; }
+.advanced summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.advanced .row-label { min-width: 16rem; }
+
+.export-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin-top: 0.8rem; border-top: 1px solid var(--line); padding-top: 0.8rem; }
+.export-summary { font-size: 0.9rem; }
+.export-summary.is-error { color: #9b2c2c; font-weight: 600; }
+.script-version { margin-left: auto; font-size: 0.8rem; }
+
+.message.info { border-color: var(--accent); background: var(--accent-soft); }
+
+dialog {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+  max-width: min(760px, 92vw);
+  color: var(--ink);
+}
+dialog::backdrop { background: rgba(20, 25, 30, 0.45); }
+.export-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.4rem 0 0.8rem; }
+.export-table th, .export-table td { text-align: left; padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.dialog-buttons { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.8rem; }
+#export-dialog-body .strong { font-weight: 600; margin-top: 0.8rem; }
+
+/* ---------- Acoustic results panel ---------- */
+
+.import-warnings { font-size: 0.88rem; color: #7a5b00; padding-left: 1.2rem; }
+.acoustics-results { overflow-x: auto; }
+
+/* ---------- Step bar, CAPE-Vr frame, optional modules ---------- */
+
+/* The progress bar: numbered circles with short labels, joined by a line.
+   Not started = empty circle; in progress = blue outline; complete = filled with a check. */
+.stepbar { min-width: 0; }
+.stepbar ol { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
+.stepbar li { display: flex; align-items: center; }
+.stepbar li + li::before { content: ""; width: 1.2rem; height: 2px; background: var(--line); margin: 0 0.15rem; }
+.stepbar button {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  border: none; background: none; border-radius: 999px;
+  padding: 0.15rem 0.35rem; font-size: 0.85rem; white-space: nowrap;
+}
+.stepbar button:hover { background: var(--accent-soft); }
+.step-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.5rem; height: 1.5rem; border-radius: 50%;
+  background: var(--panel); border: 2px solid var(--line-strong); color: var(--muted);
+  font-size: 0.75rem; font-weight: 700;
+}
+.step.is-active .step-mark { border-color: var(--accent); color: var(--accent); }
+.step.is-done .step-mark { background: var(--accent); border-color: var(--accent); color: #fff; }
+.step-label { color: var(--muted); }
+.step.is-active .step-label, .step.is-done .step-label { color: var(--ink); }
+
+/* One short line above the CAPE-Vr form. */
+.step-hint { margin: 0.6rem 0 0; font-size: 0.8rem; color: var(--muted); text-align: center; }
+
+/* Report buttons: blue border, matching the CAPE-Vr form's frame. */
+.report-btn { border: 2px solid var(--accent); color: var(--accent); font-weight: 600; background: #fff; }
+.report-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+.report-card {
+  position: relative;
+  border: 3px solid var(--accent); border-radius: 12px; background: #f7fafd;
+  padding: 1.3rem 1rem 0.9rem; margin: 1.4rem 0;
+}
+.report-card p { font-size: 0.9rem; color: var(--muted); margin-top: 0; }
+.report-card .report-btn { font-size: 1rem; padding: 0.45rem 1rem; }
+
+/* Floating player (bottom-right), for listening while rating. */
+.float-player {
+  position: fixed; right: 12px; bottom: 12px; z-index: 20;
+  width: min(330px, calc(100vw - 24px));
+  background: var(--panel); border: 2px solid var(--accent); border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  font-size: 0.85rem;
+}
+.float-player[hidden] { display: none; }
+.fp-head { display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--line); }
+.fp-list { max-height: 45vh; overflow-y: auto; padding: 0.2rem 0.3rem; }
+.fp-list[hidden] { display: none; }
+.fp-row { display: grid; grid-template-columns: auto 1fr auto; gap: 0.5rem; align-items: center; padding: 0.25rem 0.3rem; border-radius: 6px; }
+.fp-row.is-playing { background: var(--accent-soft); }
+.fp-row.is-excluded { opacity: 0.55; }
+.fp-play { width: 2.1rem; height: 2.1rem; padding: 0; border-radius: 50%; border-color: var(--accent); color: var(--accent); font-size: 0.8rem; }
+.fp-task { font-weight: 600; }
+.fp-name { font-size: 0.75rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 12rem; }
+.fp-time { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.report-mode .float-player { display: none; }
+
+/* The CAPE-Vr form: a clear blue frame, usable on its own. */
+.capevr-frame {
+  position: relative;
+  border: 3px solid var(--accent);
+  border-radius: 12px;
+  padding: 1.4rem 1rem 0.6rem;
+  margin: 1.2rem 0;
+  background: #f7fafd;
+}
+.frame-tag {
+  position: absolute; top: -0.8rem; left: 1rem;
+  background: var(--accent); color: #fff; font-size: 0.8rem; font-weight: 700;
+  padding: 0.1rem 0.7rem; border-radius: 999px; letter-spacing: 0.02em;
+}
+
+/* Optional modules: dashed, grey, collapsed until opened. */
+.module { border: 2px dashed var(--line-strong); border-radius: 12px; margin: 1rem 0; background: #fbfbfb; }
+.module[open] { background: transparent; }
+.module-head { cursor: pointer; padding: 0.7rem 1rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.6rem; }
+.module-title { font-weight: 700; font-size: 1.02rem; }
+.optional-tag { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; border: 1px solid var(--line-strong); color: var(--muted); border-radius: 999px; padding: 0 0.5rem; }
+.module-hint { font-size: 0.85rem; color: var(--muted); }
+.module-body { padding: 0 0.8rem 0.6rem; }
+
+/* Excluded takes */
+.rec-row.is-excluded { opacity: 0.6; background: #f6f6f6; }
+.rec-exclude { display: inline-block; margin-left: 0.8rem; font-size: 0.82rem; }
+.rec-exclude-reason { margin-top: 0.3rem; max-width: 22rem; font-size: 0.85rem !important; }
+.r-excluded { font-size: 8pt; font-style: italic; }
+
+/* ---------- Documentation ---------- */
+
+.doc-actions { display: flex; flex-wrap: wrap; gap: 0.4rem 0.6rem; align-items: center; }
+.doc-warning { border: 1px solid var(--warn-line); background: var(--warn-bg); border-radius: 6px; padding: 0.4rem 0.8rem; margin: 0.6rem 0; font-size: 0.88rem; }
+.doc-section { border-top: 1px solid var(--line); padding: 0.5rem 0; }
+.doc-section > summary { cursor: pointer; font-weight: 600; padding: 0.2rem 0; }
+.copy-note { font-size: 0.8rem; color: #7a5b00; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.why-list { margin: 0.2rem 0 0.4rem 1.6rem; padding-left: 0.8rem; font-size: 0.85rem; color: var(--muted); border-left: 2px solid var(--accent-soft); list-style: square; }
+.doc-notes { font-size: 0.85rem; color: #7a5b00; padding-left: 1.2rem; }
+.suggestion { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.8rem; margin: 0.25rem 0 0.25rem 0.5rem; }
+.why-inline summary { cursor: pointer; font-size: 0.8rem; color: var(--accent); }
+.doc-block { margin: 0.4rem 0; }
+.doc-block-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; margin-bottom: 0.3rem; }
+.doc-state { font-size: 0.82rem; color: var(--muted); margin-right: auto; }
+.doc-block textarea { font-family: ui-monospace, Consolas, monospace; font-size: 0.88rem; }
+.sources { margin-top: 0.3rem; font-size: 0.88rem; }
+.sources summary { cursor: pointer; color: var(--accent); }
+.sources ol { padding-left: 1.4rem; }
+.src-text { font-weight: 600; }
+button.small { font-size: 0.82rem; padding: 0.2rem 0.6rem; }
+
+.rule { border: 1px solid var(--line); border-radius: 6px; padding: 0.4rem 0.8rem 0.6rem; margin: 0.6rem 0; }
+.rule legend { font-weight: 600; padding: 0 0.3rem; }
+.rule-note { font-size: 0.82rem; color: var(--muted); }
+.rule-toggle { margin-right: 0.8rem; font-size: 0.9rem; white-space: nowrap; }
+.rule-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.4rem; margin: 0.3rem 0; }
+.rule-sub { font-size: 0.85rem; font-weight: 600; margin-right: 0.4rem; }
+.rule-table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.3rem 0; }
+.rule-table th, .rule-table td { border-bottom: 1px solid var(--line); padding: 0.25rem 0.3rem; text-align: left; vertical-align: middle; }
+.rule-table input[type="number"] { width: 7rem; }
+.rule-important { border-left: 3px solid var(--warn-line); background: var(--warn-bg); padding: 0.3rem 0.6rem; font-size: 0.84rem; margin: 0.4rem 0; }
+.rule-caution { font-size: 0.82rem; color: #7a5b00; margin: 0 0 0.3rem; }
+.rule-settings { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+.rule-collapsible > summary { cursor: pointer; font-weight: 600; padding: 0.2rem 0; }
+.pending-rule { border: 1px solid var(--line); border-radius: 6px; margin: 0.5rem 0; padding: 0.3rem 0.8rem 0.5rem; }
+.pending-rule legend { font-weight: 600; padding: 0 0.3rem; }
+.rule-table select { font: inherit; padding: 0.2rem; border: 1px solid var(--line); border-radius: 4px; }
+.rule-table input[type="text"] { min-width: 14rem; }
+.rule-check { font-size: 0.82rem; color: var(--muted); }
+.rule-check.is-error { color: #9b2c2c; }
+.field.narrow input { max-width: 10rem; }
+input::placeholder { color: #a7aeb6; font-style: italic; }
+
+/* ---------- Report ---------- */
+
+.report-mode .app-bar, .report-mode .page { display: none; }
+.report-toolbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;
+  padding: 0.6rem 1rem; background: var(--panel); border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+.toolbar-group { display: inline-flex; align-items: center; gap: 0.3rem 0.8rem; flex-wrap: wrap; padding-left: 1rem; border-left: 1px solid var(--line); }
+/* Privacy options and their note, grouped on their own line. */
+.toolbar-privacy { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 1.2rem;
+  border: 1px solid var(--line); border-radius: 6px; padding: 0.3rem 0.8rem 0.4rem; margin: 0; }
+.toolbar-privacy legend { font-weight: 600; padding: 0 0.3rem; }
+.toolbar-privacy p { flex-basis: 100%; margin: 0; font-size: 0.82rem; }
+.report {
+  background: #fff; color: #000;
+  max-width: 190mm; margin: 1rem auto 3rem; padding: 12mm;
+  border: 1px solid var(--line); font-size: 10.5pt; line-height: 1.35;
+}
+.r-title { font-size: 13pt; text-align: center; margin: 0 0 4mm; }
+.r-h2 { font-size: 12pt; margin: 0 0 2mm; border-bottom: 1px solid #000; padding-bottom: 1mm; }
+.r-h3 { font-size: 10.5pt; margin: 4mm 0 1.5mm; }
+.r-header { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1mm 6mm; margin-bottom: 3mm; }
+.r-box { border: 1px solid #000; padding: 1.5mm 2.5mm; margin: 2mm 0; }
+.r-box-title, .r-sub { font-weight: 700; }
+.r-line { margin: 1mm 0; }
+.r-fill { display: inline-block; border-bottom: 1px solid #000; min-width: 12mm; padding: 0 1mm; }
+.r-fill.w-s { min-width: 12mm; } .r-fill.w-m { min-width: 30mm; } .r-fill.w-l { min-width: 55mm; } .r-fill.w-xl { min-width: 110mm; }
+.r-opts { white-space: normal; }
+.r-opt { display: inline-block; padding: 0 1.5mm; border: 1px solid transparent; border-radius: 999px; }
+.r-opt.is-on { border: 1.5px solid #000; font-weight: 700; }   /* "circled", as on the paper form */
+.r-sentences { margin: 0.5mm 0 1mm 6mm; padding: 0; list-style: none; columns: 2; }
+.r-modeled { font-style: italic; }
+.r-stimuli { margin: 2mm 0; }
+
+.r-vas { margin: 4mm 0 3mm; }
+.r-vas-row { display: grid; grid-template-columns: 38mm 100mm 22mm; align-items: center; gap: 4mm; margin: 2.2mm 0; }
+.r-vas-label { font-weight: 700; }
+.r-vas-head { margin-bottom: 0; font-size: 9pt; }
+.r-vas-ends { display: flex; justify-content: space-between; }
+.r-vas-line { position: relative; display: block; width: 100mm; height: 0; border-top: 1px solid #000; }   /* exactly 100 mm */
+.r-vas-tick { position: absolute; top: -2.5mm; width: 0; height: 5mm; border-left: 1.5px solid #000; }
+.r-vas-score { text-align: right; }
+.r-desc-row { display: grid; grid-template-columns: 22mm auto 1fr; gap: 3mm; align-items: baseline; margin: 1.2mm 0; }
+.r-desc-comment { white-space: nowrap; }
+.r-rest .r-line { margin: 1.4mm 0; }
+.r-impression .r-fill { min-height: 10mm; vertical-align: top; }
+
+.r-acoustics { margin-top: 6mm; }
+.r-meta { font-size: 9pt; }
+.r-table { border-collapse: collapse; width: 100%; font-size: 9pt; margin: 1mm 0 2mm; }
+.r-table th, .r-table td { border: 1px solid #999; padding: 0.8mm 1.5mm; text-align: left; vertical-align: top; }
+.r-table thead th { background: #f2f2f2; }
+.r-table td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.r-info-row th, .r-info-row td { color: #333; font-style: italic; }
+.r-file { font-family: ui-monospace, Consolas, monospace; font-size: 8.5pt; overflow-wrap: anywhere; }
+.r-orig { font-size: 8pt; color: #444; }
+.r-footnotes, .r-notes { font-size: 8.5pt; margin: 1mm 0 2mm; padding-left: 5mm; }
+.r-methods { font-size: 9.5pt; text-align: justify; }
+.r-doc { margin-top: 6mm; }
+.r-doc-text { white-space: pre-wrap; font-size: 10pt; }
+.r-footer { margin-top: 6mm; border-top: 1px solid #000; padding-top: 2mm; font-size: 8pt; color: #333; }
+.r-footer p { margin: 0.5mm 0; }
+
+@media print {
+  @page { margin: 12mm; }
+  html, body { background: #fff; }
+  .app-bar, .page, .report-toolbar, .float-player { display: none !important; }
+  #report-view { display: block !important; }
+  .report { border: none; margin: 0; padding: 0; max-width: none; }
+  .r-acoustics { break-before: page; }
+  .r-table, .r-vas-row, .r-box { break-inside: avoid; }
+}
+
+/* ---------- Numbers toggle, notices, About ---------- */
+
+.vas-options { display: flex; justify-content: flex-end; margin-bottom: 0.2rem; }
+/* "Show numerical values" off: hide the score boxes, keep the layout. */
+.hide-vas-numbers .vas-row .vas-score { visibility: hidden; }
+
+.notice { font-size: 0.78rem; color: var(--muted); margin: 0.4rem 0 0; }
+.doc-block .notice { margin-top: 0.2rem; }
+.intended-use { text-align: center; font-size: 0.82rem; color: var(--muted); margin: 1.2rem 0 0.3rem; }
+.about { font-size: 0.88rem; }
+.about summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+.about h3 { font-size: 0.92rem; margin: 0.9rem 0 0.2rem; }
+.about p { margin: 0.2rem 0 0.5rem; }
+.r-smallprint { font-size: 7.5pt; color: #444; margin-top: 2mm; }
+.r-adapted { text-align: center; font-size: 8pt; color: #444; margin: -3mm 0 3mm; }
+
+/* ---------- Instructions (collapsed by default) ---------- */
+
+.instructions summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.2rem 0;
+}
+.instructions[open] summary { margin-bottom: 0.4rem; }
+.instructions h3 { font-size: 0.95rem; margin: 1rem 0 0.3rem; }
+.instructions ul { margin: 0.3rem 0; padding-left: 1.3rem; }
+.instructions li { margin: 0.3rem 0; }
+.instructions h4 { font-size: 0.92rem; margin: 0.8rem 0 0.3rem; font-style: italic; }
+.instructions p, .instructions li { font-size: 0.92rem; }
+.instructions .instruction-sentences { margin: 0.3rem 0 0.5rem 1.4rem; padding: 0; }
+.instructions .definitions { list-style: none; padding-left: 0.8rem; }
+/* Notes that are ours, not part of Table 1 */
+.app-note {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.88rem !important;
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 700px) {
+  .header-grid, .two-col, .three-col { grid-template-columns: 1fr 1fr; }
+  .three-col .field:last-child { grid-column: span 2; }
+  .row-label { min-width: 100%; }
+  .desc-row { grid-template-columns: 1fr; }
+  .vas-head, .vas-row { grid-template-columns: 1fr; gap: 0.2rem; }
+  .vas-head > span:first-child { display: none; }
+  .modeled { display: block; margin-left: 0; white-space: normal; }
+  .rec-row { grid-template-columns: 1fr auto; grid-template-areas: "info remove" "player player" "task task" "export export" "notes notes"; }
+  .settings-grid { grid-template-columns: 1fr 1fr; }
+  .advanced .row-label { min-width: 100%; }
+  /* Progress bar: circles only; the full step name is in each circle's tooltip. */
+  .step-label { display: none; }
+  .stepbar li + li::before { width: 0.5rem; }
+  .app-bar { gap: 0.3rem; padding: 0 0.4rem; }
+  .bar-btn { padding: 0.2rem 0.35rem; }
+}

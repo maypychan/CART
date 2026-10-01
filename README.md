@@ -165,9 +165,13 @@ This software assists with documentation and reporting only.
 
 **Attribution.** CART implements a documentation workflow around the CAPE-Vr
 (Kempster, Nagle & Solomon, 2025, *J Voice*, doi:10.1016/j.jvoice.2025.01.022).
-The form content is adapted under CC BY 4.0. CART is independent and is not
-affiliated with or endorsed by the CAPE-Vr or CAPE-V authors, ASHA, The Voice
-Foundation, or Elsevier. Praat is separate software by P. Boersma and D. Weenink.
+The CAPE-Vr form content is adapted under the
+[Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+Modifications include electronic presentation of the form, additional
+documentation and reporting features, and application-specific notes. CART is
+independent and is not affiliated with or endorsed by the CAPE-Vr or CAPE-V
+authors, ASHA, The Voice Foundation, or Elsevier. Praat is separate software by
+P. Boersma and D. Weenink.
 
 ## Design principles
 - Acoustic measures are computed by Praat, not by this application.

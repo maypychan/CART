@@ -350,6 +350,7 @@
         S.setPath(session, path, el.checked);
         if (path === 'stimuli.showStimulusText') { renderStimulusText(); }
         if (path === 'vas.showNumbers') { renderNumberVisibility(); }
+        if (path.indexOf('stimuli.examinerModeled.') === 0) { renderModeledAll(); }
         markDirty();
       });
     } else if (el.type === 'number') {
@@ -392,6 +393,15 @@
     document.body.classList.toggle('hide-vas-numbers', !session.vas.showNumbers);
   }
 
+  // The button reads "Clear all" once every "examiner modeled" box is ticked.
+  function modeledBoxes() {
+    return Array.prototype.slice.call(document.querySelectorAll('.modeled input[type="checkbox"]'));
+  }
+  function renderModeledAll() {
+    var allTicked = modeledBoxes().every(function (box) { return box.checked; });
+    document.getElementById('btn-modeled-all').textContent = allTicked ? 'Clear all' : 'Select all';
+  }
+
   // ---------------------------------------------------------------------
   // Copy the whole session into the form
   // ---------------------------------------------------------------------
@@ -409,6 +419,7 @@
     renderAdditional();
     renderStimulusText();
     renderNumberVisibility();
+    renderModeledAll();
     window.CapeNotices.render();
     window.CapeUpload.render();
     window.CapeImport.render();
@@ -586,6 +597,15 @@
     document.getElementById('btn-new').addEventListener('click', newSession);
     document.getElementById('btn-save').addEventListener('click', saveSession);
     document.getElementById('btn-add-attr').addEventListener('click', addAttribute);
+    // Select all / Clear all: ticks every "examiner modeled" box, or, if all
+    // are already ticked, unticks them all, as if each box were clicked.
+    document.getElementById('btn-modeled-all').addEventListener('click', function () {
+      var boxes = modeledBoxes();
+      var tick = !boxes.every(function (box) { return box.checked; });
+      boxes.forEach(function (box) {
+        if (box.checked !== tick) { box.checked = tick; box.dispatchEvent(new Event('change')); }
+      });
+    });
 
     var fileInput = document.getElementById('file-load');
     document.getElementById('btn-load').addEventListener('click', function () {

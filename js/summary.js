@@ -385,7 +385,7 @@
     var modeled = [1, 2, 3, 4, 5, 6].filter(function (n) { return session.stimuli.examinerModeled['sentence_' + n]; })
       .map(function (n) { return 'sentence_' + n; });
     if (modeled.length) {
-      out.push({ text: 'The examiner modeled ' + describeTasks(modeled) + '.', why: ['CAPE-Vr form: "Check if the examiner modeled the sentences"'] });
+      out.push({ text: 'The examiner modeled ' + describeTasks(modeled) + '.', why: ['CAPE-Vr form: "Check if the examiner modeled the sentence."'] });
     }
     if (session.stimuli.extempPromptUsed && session.stimuli.extempPromptUsed.trim()) {
       out.push({ text: 'An alternative extemporaneous prompt was used: “' + session.stimuli.extempPromptUsed.trim() + '”.',

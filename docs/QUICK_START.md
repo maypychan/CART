@@ -83,10 +83,8 @@ summaries.
 
 ## 4. Documentation (step 3, optional)
 
-Open **3 · Documentation tools**, below the acoustics. You can see and edit
-everything here at any time, but the text can only be copied after the
-session has been saved at least once ("Save the session first to copy").
-Loading a saved session file counts as saved.
+Open **3 · Documentation tools**, below the acoustics. You can see, edit,
+and copy everything here at any time.
 
 - **Statements from your clinic's rules:** one list of statements produced
   by your clinic's rules, each with its value (e.g. "Primary perceptual
@@ -136,8 +134,6 @@ the bottom of the page).
 - **Can I rate without seeing the acoustic results?** Yes: finish and save
   your ratings before you import `results.json`. Results are shown as soon
   as they are imported.
-- **Why can't I copy the summary?** Save the session first. Copying is
-  available once the session has been saved at least once.
 - **I reloaded a session and the recordings say "Not loaded".** The audio
   isn't stored in the session file. Add the same WAV files again, and they
   reconnect automatically.

@@ -490,7 +490,6 @@ dialog::backdrop { background: rgba(31, 41, 55, 0.4); }
 .doc-warning { border: 1px solid var(--warn-line); border-left: 4px solid var(--amber); background: var(--warn-bg); border-radius: var(--radius-sm); padding: 0.45rem 0.8rem; margin: 0.6rem 0; font-size: 0.87rem; }
 .doc-section { border-top: 1px solid var(--line); padding: 0.5rem 0; }
 .doc-section > summary { cursor: pointer; font-weight: 600; padding: 0.2rem 0; }
-.copy-note { font-size: 0.8rem; color: var(--amber-ink); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 .why-list { margin: 0.2rem 0 0.4rem 1.6rem; padding-left: 0.8rem; font-size: 0.85rem; color: var(--muted); border-left: 2px solid #b9d3d3; list-style: square; }
 .doc-notes { font-size: 0.85rem; color: var(--amber-ink); padding-left: 1.2rem; }
@@ -545,19 +544,25 @@ input::placeholder { color: #9ca3af; font-style: italic; }
   border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.3rem 0.8rem 0.4rem; margin: 0; }
 .toolbar-privacy legend { font-weight: 600; padding: 0 0.3rem; }
 .toolbar-privacy p { flex-basis: 100%; margin: 0; font-size: 0.82rem; }
+/* Report spacing is kept tight so the CAPE-Vr form, up to Overall Impression,
+   fits on one printed page (A4 or US Letter, 12 mm margins). */
 .report {
   background: #fff; color: #000;
   max-width: 190mm; margin: 1rem auto 3rem; padding: 12mm;
-  border: 1px solid var(--line); font-size: 10.5pt; line-height: 1.35;
+  border: 1px solid var(--line); font-size: 10.5pt; line-height: 1.25;
   box-shadow: 0 1px 3px rgba(31, 41, 55, 0.08);
 }
-.r-title { font-size: 13pt; text-align: center; margin: 0 0 4mm; }
+.r-title { font-size: 13pt; text-align: center; margin: 0 0 3mm; }
 .r-h2 { font-size: 12pt; margin: 0 0 2mm; border-bottom: 1px solid #000; padding-bottom: 1mm; }
 .r-h3 { font-size: 10.5pt; margin: 4mm 0 1.5mm; }
-.r-header { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1mm 6mm; margin-bottom: 3mm; }
-.r-box { border: 1px solid #000; padding: 1.5mm 2.5mm; margin: 2mm 0; }
+.r-header { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1mm 6mm; margin-bottom: 2mm; }
+.r-box { border: 1px solid #000; padding: 1.2mm 2.5mm; margin: 1.5mm 0; }
 .r-box-title, .r-sub { font-weight: 700; }
-.r-line { margin: 1mm 0; }
+.r-line { margin: 0.7mm 0; }
+.r-gap { display: inline-block; width: 8mm; }   /* space between two groups on one line */
+/* A label stays with its fill-in line: the pair moves to the next line as one
+   piece, and wraps inside only if it is longer than a whole line. */
+.r-pair { display: inline-block; max-width: 100%; }
 .r-fill { display: inline-block; border-bottom: 1px solid #000; min-width: 12mm; padding: 0 1mm; }
 .r-fill.w-s { min-width: 12mm; } .r-fill.w-m { min-width: 30mm; } .r-fill.w-l { min-width: 55mm; } .r-fill.w-xl { min-width: 110mm; }
 .r-opts { white-space: normal; }
@@ -565,19 +570,19 @@ input::placeholder { color: #9ca3af; font-style: italic; }
 .r-opt.is-on { border: 1.5px solid #000; font-weight: 700; }   /* "circled", as on the paper form */
 .r-sentences { margin: 0.5mm 0 1mm 6mm; padding: 0; list-style: none; columns: 2; }
 .r-modeled { font-style: italic; }
-.r-stimuli { margin: 2mm 0; }
+.r-stimuli { margin: 1.5mm 0; }
 
-.r-vas { margin: 4mm 0 3mm; }
-.r-vas-row { display: grid; grid-template-columns: 38mm 100mm 22mm; align-items: center; gap: 4mm; margin: 2.2mm 0; }
+.r-vas { margin: 3mm 0 2mm; }
+.r-vas-row { display: grid; grid-template-columns: 38mm 100mm 22mm; align-items: center; gap: 4mm; margin: 1.5mm 0; }
 .r-vas-label { font-weight: 700; }
 .r-vas-head { margin-bottom: 0; font-size: 9pt; }
 .r-vas-ends { display: flex; justify-content: space-between; }
 .r-vas-line { position: relative; display: block; width: 100mm; height: 0; border-top: 1px solid #000; }   /* exactly 100 mm */
 .r-vas-tick { position: absolute; top: -2.5mm; width: 0; height: 5mm; border-left: 1.5px solid #000; }
 .r-vas-score { text-align: right; }
-.r-desc-row { display: grid; grid-template-columns: 22mm auto 1fr; gap: 3mm; align-items: baseline; margin: 1.2mm 0; }
+.r-desc-row { display: grid; grid-template-columns: 22mm auto 1fr; gap: 3mm; align-items: baseline; margin: 0.8mm 0; }
 .r-desc-comment { white-space: nowrap; }
-.r-rest .r-line { margin: 1.4mm 0; }
+.r-rest .r-line { margin: 1mm 0; }
 .r-impression .r-fill { min-height: 10mm; vertical-align: top; }
 
 .r-acoustics { margin-top: 6mm; }
@@ -616,13 +621,15 @@ input::placeholder { color: #9ca3af; font-style: italic; }
 .notice { font-size: 0.78rem; color: var(--muted); margin: 0.4rem 0 0; }
 .doc-block .notice { margin-top: 0.2rem; }
 .intended-use { font-size: 0.82rem; color: var(--muted); margin: 1.2rem 0 0.3rem; }
-.about { font-size: 0.88rem; }
-.about.card { border-radius: 2px; padding: 0.8rem var(--sheet-pad); box-shadow: var(--shadow); }   /* matches the sheets */
-.about summary { cursor: pointer; font-weight: 600; color: var(--accent); }
-.about h3 { font-size: 0.92rem; margin: 0.9rem 0 0.2rem; }
-.about p { margin: 0.2rem 0 0.5rem; }
+/* About: plain page text (no card), same small muted style as the intended-use line above it.
+   Its title uses the normal section-heading size and dark ink, so it reads as one level above
+   the small grey part headings (Intended use, Acoustic analysis, ...). */
+.about { font-size: 0.82rem; color: var(--muted); margin: 0.6rem 0 1.2rem; }
+.about h2 { font-size: 1rem; font-weight: 600; color: var(--ink); margin: 0 0 0.4rem; }
+.about h3 { font-size: inherit; font-weight: 600; color: inherit; margin: 0.7rem 0 0.1rem; }
+.about p { margin: 0 0 0.4rem; }
 .r-smallprint { font-size: 7.5pt; color: #444; margin-top: 2mm; }
-.r-adapted { text-align: center; font-size: 8pt; color: #444; margin: -3mm 0 3mm; }
+.r-adapted { text-align: center; font-size: 8pt; color: #444; margin: -3mm 0 2mm; }
 
 /* ---------- Instructions (collapsed by default) ---------- */
 

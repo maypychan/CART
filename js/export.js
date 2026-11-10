@@ -249,6 +249,11 @@
     return t ? t[1] : id;
   }
 
+  // Stages: validate (errors -> message, stop) -> confirm dialog ->
+  // build ("Making the package…", button greyed out) -> download and record
+  // session.audio.lastExport (step 2 "package made"), or an error message.
+  // lastExport is kept as it is if the files change afterwards; differences
+  // are reported when results.json is imported.
   function exportPackage() {
     var session = app.getSession();
     var check = U.validate(session);
@@ -275,7 +280,12 @@
 
     var status = document.getElementById('export-summary');
     status.textContent = 'Making the package…';
+    // Busy: the button is greyed out until the download starts or an error
+    // is shown, so a second click cannot start a second package.
+    var button = document.getElementById('btn-export');
+    button.disabled = true;
     buildZip(entries).then(function (zip) {
+      button.disabled = false;
       var name = folder + '.zip';
       var url = URL.createObjectURL(zip);
       var a = document.createElement('a');
@@ -302,6 +312,7 @@
         'Please also save the session (Save), so it records which file went into the package.'
       ]);
     }).catch(function (err) {
+      button.disabled = false;
       app.showMessage('error', 'The package could not be made.', [err.message]);
       app.render();
     });
@@ -477,8 +488,7 @@
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
     // Completes step 3 on the progress bar (saved with the next save).
-    if (!session.progress.csvExportedAt) { session.progress.csvExportedAt = S.isoNow(); }
-    app.renderSteps();
+    app.noteProgress('csvExportedAt');
   }
 
   function init(shared) {

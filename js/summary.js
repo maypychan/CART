@@ -4,8 +4,7 @@
  * (rules.js).
  *
  * Every generated sentence carries its "why" (values + rule) so nothing is
- * hidden logic; nothing here diagnoses. The texts can be copied only after
- * the session has been saved at least once.
+ * hidden logic; nothing here diagnoses. The texts can be copied at any time.
  */
 (function () {
   'use strict';
@@ -169,9 +168,12 @@
       out.bullets.push({ id: id, text: text, why: why, included: excluded.indexOf(id) === -1 });
     }
 
-    var chk = window.CapeRules.checkSeverity(rules);
+    // Each rule: 'empty' = silent; 'incomplete' = a note saying why;
+    // 'active' = applied (see CapeRules.ruleState).
+    var sevState = window.CapeRules.ruleState(rules, 'severity');
+    var chk = sevState.check;
     var sv = session.vas.overallSeverity;
-    if (!chk.ok) { if (!chk.empty) { out.notes.push('Severity rule inactive: ' + chk.error); } }
+    if (sevState.state !== 'active') { if (sevState.state === 'incomplete') { out.notes.push('Severity rule inactive: ' + sevState.reason); } }
     else if (sv === null) { out.notes.push('Severity rule: Overall Severity was not rated.'); }
     else {
       var match = chk.ranges.filter(function (r) { return sv >= r.min && sv <= r.max; })[0];
@@ -188,7 +190,8 @@
     // "primary" just because it is the highest of low scores. The rule is
     // active once a minimum score is entered.
     var rk = rules.ranking;
-    if (rk.minScore !== null) {
+    var rkState = window.CapeRules.ruleState(rules, 'ranking');
+    if (rkState.state !== 'empty') {
       var rated = attrEntries(session, rk.attributes).filter(function (a) { return a.value !== null && a.value !== undefined; });
       var eligible = rated.filter(function (a) { return a.value >= rk.minScore; }).sort(function (a, b) { return b.value - a.value; });
       var margin = rk.tieMargin || 0;
@@ -196,7 +199,7 @@
         ' ranked by score; minimum score ' + rk.minScore + '; ' + (margin ? 'within ' + margin + ' point(s) = same rank' : 'exact ties = same rank') +
         '; up to ' + rk.maxRanks + ' rank(s)';
       var baseWhy = rated.map(function (a) { return a.label + ' = ' + a.value + '/100'; });
-      if (!rk.attributes.length) { out.notes.push('Feature ranking inactive: no attributes are ticked.'); }
+      if (rkState.state === 'incomplete') { out.notes.push('Feature ranking inactive: ' + rkState.reason + '.'); }
       else if (!eligible.length) { out.notes.push('Feature ranking: no chosen attribute reaches the minimum score (' + rk.minScore + ').'); }
       // Measured from the rank's highest score, not the previous attribute,
       // so ties cannot chain across a wide spread of scores.
@@ -215,8 +218,9 @@
       }
     }
 
-    var dc = window.CapeRules.checkRanges(rules.descriptors.ranges, 0, 100);
-    if (!dc.ok) { if (!dc.empty) { out.notes.push('Attribute descriptors inactive: ' + dc.error); } }
+    var dcState = window.CapeRules.ruleState(rules, 'descriptors');
+    var dc = dcState.check;
+    if (dcState.state !== 'active') { if (dcState.state === 'incomplete') { out.notes.push('Attribute descriptors inactive: ' + dcState.reason); } }
     else {
       attrEntries(session, rules.descriptors.attributes).forEach(function (a) {
         if (a.value === null || a.value === undefined) { return; }
@@ -234,10 +238,10 @@
     if (session.acoustics) {
       var results = session.acoustics.results;
       rules.references.forEach(function (ref) {
-        if (window.CapeRules.referenceEmpty(ref)) { return; }
+        var refState = window.CapeRules.referenceState(ref);
+        if (refState.state === 'empty') { return; }
         var def = window.CapeRules.refDef(ref.id);
-        var problem = window.CapeRules.referenceProblem(ref);
-        if (problem) { out.notes.push('Reference value “' + def.label + '” inactive: ' + problem + '.'); return; }
+        if (refState.state === 'incomplete') { out.notes.push('Reference value “' + def.label + '” inactive: ' + refState.reason + '.'); return; }
         var its = out.items.filter(function (it) { return it.measure === def.measure && it.group === def.group; });
         if (!its.length) { out.notes.push('Reference value “' + def.label + '”: this measure/task is not included in the summary (see “Acoustic values in the Clinical Summary and EMR draft”).'); return; }
         var diffs = window.CapeRules.settingsDifferences(ref, results);
@@ -519,13 +523,14 @@
     return det;
   }
 
-  // Copying is allowed only once the session has been saved, so text never
-  // leaves the app before there is a saved record it came from.
-  function canCopy(session) { return !!session.savedAt; }
-  var COPY_BLOCKED = 'Save the session first to copy.';
-
   // Once the clinician edits the text it is never regenerated automatically,
   // so their wording is not silently overwritten by a rule or rating change.
+  // States: 'generated' (<key>Edited false: the text is rebuilt on every
+  // redraw) -> typing -> 'edited' (kept) -> Regenerate -> 'generated'.
+  // The Regenerate button is shown in the 'edited' state; it is added as
+  // soon as the first edit is typed (without redrawing the text box, so
+  // typing is not interrupted).
+  var EDITED_NOTE = 'Edited by you. Changes to the ratings or rules no longer update this text.';
   function editableBlock(host, session, key, generated, title) {
     var d = session.documentation;
     var editedKey = key + 'Edited', textKey = key + 'Text';
@@ -535,8 +540,8 @@
 
     var wrap = el('div', 'doc-block');
     var head = el('div', 'doc-block-head');
-    head.appendChild(el('span', 'doc-state', d[editedKey] ? 'Edited by you. Changes to the ratings or rules no longer update this text.' : 'Generated. It updates automatically until you edit it.'));
-    if (d[editedKey]) {
+    head.appendChild(el('span', 'doc-state', d[editedKey] ? EDITED_NOTE : 'Generated. It updates automatically until you edit it.'));
+    function regenButton() {
       var regen = el('button', 'small', 'Regenerate (replaces your edits)');
       regen.type = 'button';
       regen.addEventListener('click', function () {
@@ -544,15 +549,15 @@
         d[editedKey] = false;
         app.markDirty();
         render();
+        app.renderSteps();   // step 3 may no longer be "in progress"
       });
-      head.appendChild(regen);
+      return regen;
     }
+    if (d[editedKey]) { head.appendChild(regenButton()); }
     var copy = el('button', 'small primary', 'Copy to clipboard');
     copy.type = 'button';
-    copy.disabled = !canCopy(session);
     copy.addEventListener('click', function () { copyText(ta, copy); });
     head.appendChild(copy);
-    if (!canCopy(session)) { head.appendChild(el('span', 'copy-note', COPY_BLOCKED)); }
     wrap.appendChild(head);
     var ta = document.createElement('textarea');
     ta.rows = key === 'emr' ? 8 : 14;
@@ -560,15 +565,14 @@
     ta.setAttribute('aria-label', title);
     ta.addEventListener('input', function () {
       d[textKey] = ta.value;
-      if (!d[editedKey]) { d[editedKey] = true; head.querySelector('.doc-state').textContent = 'Edited by you. Changes to the ratings or rules no longer update this text.'; }
+      if (!d[editedKey]) {
+        // First edit: switch to 'edited' and show Regenerate, before Copy.
+        d[editedKey] = true;
+        head.querySelector('.doc-state').textContent = EDITED_NOTE;
+        head.insertBefore(regenButton(), copy);
+      }
       app.markDirty();
       app.renderSteps();
-    });
-    // Ctrl+C / Ctrl+X are blocked the same way as the button.
-    ['copy', 'cut'].forEach(function (type) {
-      ta.addEventListener(type, function (e) {
-        if (!canCopy(app.getSession())) { e.preventDefault(); window.alert(COPY_BLOCKED); }
-      });
     });
     wrap.appendChild(ta);
     wrap.appendChild(el('p', 'notice', key === 'emr' ? window.CapeNotices.EMR_SHORT : window.CapeNotices.SUMMARY_SHORT));
@@ -583,9 +587,7 @@
       setTimeout(function () { button.textContent = old; }, 2000);
       if (ok) {
         // Completes step 3 on the progress bar (saved with the next save).
-        var session = app.getSession();
-        if (!session.progress.docCopiedAt) { session.progress.docCopiedAt = S.isoNow(); }
-        app.renderSteps();
+        app.noteProgress('docCopiedAt');
       }
     }
     if (navigator.clipboard && window.isSecureContext) {
@@ -660,6 +662,7 @@
     MEASURES: MEASURES,
     init: init,
     render: render,
+    ensureDoc: ensureDoc,   // called by form.js when a session is made or loaded
     compute: function (session) { window.CapeRules.ensure(session); ensureDoc(session); return compute(session); }
   };
 })();

@@ -4,6 +4,48 @@
  *
  * Each control in index.html has a data-path naming the session field it
  * edits (e.g. "vas.roughness"); the session object is the only state.
+ *
+ * STATE MAP: every state the app can be in, and the function that owns it.
+ * Read this before changing how anything is shown, enabled, or hidden.
+ *
+ *  1. Save status (this file: saveState decides it; renderStatus shows it)
+ *     New -> Dirty (any edit) -> Saved (Save) -> Dirty ...
+ *     "Loaded, never saved" = a loaded file whose savedAt is null.
+ *     New and Load replace the whole session and clear "dirty".
+ *     Playing a recording counts as an edit (its play count changes).
+ *  2. Progress bar (this file: stepStates). Each step is 'todo', 'active'
+ *     or 'done'; the rule for each is in stepStates. Steps 2-4 never go
+ *     back once done: there is no "remove results", and the step 3/4
+ *     times record the FIRST copy, CSV export, opening, or printing.
+ *     They are set only through noteProgress (this file), and are
+ *     bookkeeping: setting them does NOT mark the session
+ *     as changed; they are saved with the next save. Closing the tab
+ *     before that gives the leave-page warning (progressUnsaved).
+ *  3. Texts in the Documentation area (summary.js: editableBlock). They
+ *     can be copied at any time. Each text is 'generated' (rebuilt on
+ *     every redraw) until edited, then 'edited' (kept; Regenerate returns
+ *     it to 'generated').
+ *  4. Rules (rules.js: ruleState, referenceState). Each rule is 'empty'
+ *     (unused), 'incomplete' (inactive, with a note saying why) or
+ *     'active'. Rules switched off
+ *     in older files are held back until the clinician keeps or deletes
+ *     each one (showPendingDialog).
+ *  5. Recordings and results (upload.js, export.js, import.js). Each file
+ *     is unreadable, not loaded in this window, without a task, excluded,
+ *     or ready (validate). The session goes: no files -> files ->
+ *     package made (audio.lastExport) -> results imported (acoustics).
+ *  6. Report view vs form view (report.js: open, close). The class
+ *     body.report-mode and #report-view[hidden] always change together.
+ *     The print styles always print #report-view.
+ *  7. Floating player (upload.js: renderFloating). Absent when nothing is
+ *     playable; otherwise open or collapsed (Show/Hide, this window only).
+ *  8. Loading a file (session.js: parseSessionText). Rejected with a
+ *     message, or accepted with notes. Then adoptSession (this file)
+ *     checks its rules and documentation part, before anything is drawn.
+ *     New sessions go through adoptSession too.
+ *
+ * The progress bar is redrawn by render(), by markDirty() on the first
+ * change only, and by modules calling app.renderSteps() themselves.
  */
 (function () {
   'use strict';
@@ -13,6 +55,9 @@
   var session = S.createBlankSession();
   var dirty = false;
   var lastFileName = '';
+  // True when the rules editor must be rebuilt at the next render(): set
+  // for a new or loaded session, cleared by render().
+  var rulesEditorStale = true;
 
   // ---------------------------------------------------------------------
   // Saved / unsaved status
@@ -25,26 +70,57 @@
     if (!wasDirty) { renderSteps(); }
   }
 
+  // Records the FIRST time something happened, for steps 3 and 4 of the
+  // progress bar: 'docCopiedAt', 'csvExportedAt', 'reportOpenedAt' or
+  // 'reportPrintedAt' (fields of session.progress). Bookkeeping only: it
+  // does not mark the session as changed; the time is saved with the next
+  // save. Later calls keep the first time and only redraw the bar.
+  function noteProgress(key) {
+    if (!session.progress[key]) { session.progress[key] = S.isoNow(); }
+    renderSteps();
+  }
+
   function announceChange(path) {
     document.dispatchEvent(new CustomEvent('cape:changed', { detail: { path: path } }));
   }
 
+  // The one place that decides the save state. Used by the Save button
+  // (renderStatus) and by step 1 of the progress bar (stepStates):
+  //   'dirty'  - there are unsaved changes
+  //   'saved'  - no unsaved changes, and the session has been saved
+  //              (savedAt is set; a loaded file keeps its savedAt)
+  //   'loaded' - no unsaved changes; loaded from a file that has no savedAt
+  //   'new'    - a new session, not changed and never saved
+  function saveState() {
+    if (dirty) { return 'dirty'; }
+    if (session.savedAt) { return 'saved'; }
+    if (lastFileName) { return 'loaded'; }
+    return 'new';
+  }
+
   // Shown as a dot on the Save button, with the details in its tooltip.
   // The hidden #save-status line repeats it for screen readers.
+  // Dirty: amber; Saved and Loaded: green; New: no dot. Step 1 counts only
+  // 'saved' as complete, so a loaded file with no savedAt shows a green dot
+  // while step 1 is not complete.
   function renderStatus() {
     var btn = document.getElementById('btn-save');
     var state = '', tip;
-    if (dirty) {
-      state = 'is-dirty';
-      tip = 'Unsaved changes';
-    } else if (session.savedAt) {
-      state = 'is-saved';
-      tip = 'Saved ' + S.formatTime(session.savedAt) + (lastFileName ? ' (' + lastFileName + ')' : '');
-    } else if (lastFileName) {
-      state = 'is-saved';
-      tip = 'Loaded ' + lastFileName;
-    } else {
-      tip = 'New session, not saved yet';
+    switch (saveState()) {
+      case 'dirty':
+        state = 'is-dirty';
+        tip = 'Unsaved changes';
+        break;
+      case 'saved':
+        state = 'is-saved';
+        tip = 'Saved ' + S.formatTime(session.savedAt) + (lastFileName ? ' (' + lastFileName + ')' : '');
+        break;
+      case 'loaded':
+        state = 'is-saved';
+        tip = 'Loaded ' + lastFileName;
+        break;
+      default:   // 'new'
+        tip = 'New session, not saved yet';
     }
     btn.classList.remove('is-dirty', 'is-saved');
     if (state) { btn.classList.add(state); }
@@ -52,9 +128,17 @@
     document.getElementById('save-status').textContent = tip;
   }
 
-  // Sessions exist only in downloaded files, so closing the tab loses edits.
+  // The step 3/4 times (session.progress) as they were at the last save,
+  // load or New. noteProgress does not mark the session as changed, so
+  // this is how the leave-page warning knows they have not been saved.
+  var savedProgress = '';
+  function rememberSavedProgress() { savedProgress = JSON.stringify(session.progress); }
+  function progressUnsaved() { return JSON.stringify(session.progress) !== savedProgress; }
+
+  // Sessions exist only in downloaded files, so closing the tab loses edits,
+  // and also step 3/4 times recorded since the last save.
   window.addEventListener('beforeunload', function (e) {
-    if (dirty) {
+    if (dirty || progressUnsaved()) {
       e.preventDefault();
       e.returnValue = '';
     }
@@ -431,7 +515,6 @@
     renderSteps();
     renderStatus();
   }
-  var rulesEditorStale = true;
 
   // ---------------------------------------------------------------------
   // Optional modules and the progress bar
@@ -467,13 +550,16 @@
 
   // Three states per step: 'todo' (not started), 'active' (in progress),
   // 'done' (complete). The rule for each step is in the code below.
+  // CapeRules.ensure() here only returns the rules: adoptSession has
+  // already checked them.
   function stepStates() {
     var s = session;
     var rules = window.CapeRules.ensure(s);
     var doc = s.documentation || {};
     var p = s.progress;
 
-    var form = (s.savedAt && !dirty) ? 'done' : (dirty || formHasContent()) ? 'active' : 'todo';
+    var saved = saveState();
+    var form = saved === 'saved' ? 'done' : (saved === 'dirty' || formHasContent()) ? 'active' : 'todo';
     var acoustic = s.acoustics ? 'done' : (s.audio.files.length || s.audio.lastExport) ? 'active' : 'todo';
     var docs = (p.docCopiedAt || p.csvExportedAt) ? 'done'
       : (window.CapeRules.anyFilled(rules) || (doc.excludedSuggestions && doc.excludedSuggestions.length) ||
@@ -482,7 +568,7 @@
 
     return [
       { label: 'CAPE-Vr form', state: form, target: 'capevr-form',
-        status: { todo: 'not started', active: dirty ? 'unsaved changes' : 'in progress, not saved', done: 'saved' }[form] },
+        status: { todo: 'not started', active: saved === 'dirty' ? 'unsaved changes' : 'in progress, not saved', done: 'saved' }[form] },
       { label: 'Acoustics', optional: true, state: acoustic, module: 'module-acoustic', target: 'module-acoustic',
         status: { todo: 'no recordings yet',
           active: s.audio.lastExport ? 'package made; run it in Praat, then import results.json' : s.audio.files.length + ' recording(s) added',
@@ -532,14 +618,38 @@
     return !dirty || window.confirm('You have unsaved changes. ' + action + ' anyway and lose them?');
   }
 
+  // Makes s the current session and finishes checking it, before anything
+  // is drawn: its rules (CapeRules.ensure: fills in the clinic's rules for
+  // a new session, or checks a loaded file's rules and, if old switched-off
+  // rules are found, schedules the keep-or-delete dialog to open after the
+  // page is drawn) and its documentation part (CapeSummary.ensureDoc).
+  // Both are safe to repeat: other modules still call them "just in case",
+  // and a second call changes nothing.
+  function adoptSession(s) {
+    session = s;
+    window.CapeRules.ensure(session);
+    window.CapeSummary.ensureDoc(session);
+  }
+
+  // What New and Load have in common: replace the session, clear "dirty",
+  // remember the file name ('' for New), rebuild the rules editor at the
+  // next render, and clear the messages. The caller then draws the page.
+  // forgetAudio: true only for New. After Load, audio already in this
+  // window stays, so files with the same name and size stay connected,
+  // but anything playing is paused.
+  function replaceSession(s, fileName, forgetAudio) {
+    adoptSession(s);
+    dirty = false;
+    rememberSavedProgress();
+    lastFileName = fileName;
+    rulesEditorStale = true;
+    if (forgetAudio) { window.CapeUpload.forgetAllAudio(); } else { window.CapeUpload.pauseAll(); }
+    clearMessages();
+  }
+
   function newSession() {
     if (!confirmDiscard('Start a new session')) { return; }
-    session = S.createBlankSession();
-    dirty = false;
-    lastFileName = '';
-    rulesEditorStale = true;
-    window.CapeUpload.forgetAllAudio();
-    clearMessages();
+    replaceSession(S.createBlankSession(), '', true);
     render();
   }
 
@@ -551,11 +661,7 @@
       showMessage('error', 'Could not load ' + (fileName || 'the file'), [err.message]);
       return false;
     }
-    session = result.session;
-    dirty = false;
-    lastFileName = fileName || '';
-    rulesEditorStale = true;
-    clearMessages();
+    replaceSession(result.session, fileName || '', false);
     if (result.warnings.length) {
       showMessage('warning', 'Loaded ' + (fileName || 'the session') + ', with notes:', result.warnings);
     }
@@ -566,6 +672,7 @@
   function saveSession() {
     lastFileName = S.saveSession(session);
     dirty = false;
+    rememberSavedProgress();
     render();
   }
 
@@ -581,6 +688,7 @@
       markDirty: markDirty,
       render: render,
       renderSteps: function () { renderSteps(); },
+      noteProgress: noteProgress,
       showMessage: showMessage
     };
     window.CapeUpload.init(shared);
@@ -624,6 +732,8 @@
       reader.readAsText(file);
     });
 
+    adoptSession(session);   // the blank session made at the top of this file
+    rememberSavedProgress();
     render();
   }
 

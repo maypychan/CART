@@ -43,6 +43,11 @@
     var s = el('span', 'r-fill' + (width ? ' w-' + width : ''), value === null || value === undefined || value === '' ? ' ' : String(value));
     return s;
   }
+  // A fixed space between two groups on one line (plain spaces would
+  // collapse to one in HTML, making the groups run together).
+  function gap() { return el('span', 'r-gap'); }
+  // A label and its fill-in line, kept together if the line wraps.
+  function pair(label, fill) { return append(el('span', 'r-pair'), label, fill); }
   // Options printed in a row; the chosen ones are circled, as on paper.
   function optionsRow(listName, chosen) {
     var chosenList = Array.isArray(chosen) ? chosen : (chosen ? [chosen] : []);
@@ -103,11 +108,16 @@
     var rc = s.recordingConditions;
     var box1 = el('div', 'r-box');
     box1.appendChild(el('div', 'r-box-title', 'Recording Conditions'));
+    // One question per group, with a clear gap between groups, so it is
+    // obvious which options belong together. Same order as the paper form.
     append(box1, append(el('div', 'r-line'),
-      'Audio recorded: ', optionsRow('yesNo', rc.audioRecorded), '    ',
-      optionsRow('sessionMode', rc.sessionMode), '    Environment: ', optionsRow('environment', rc.environment)));
+      'Audio recorded: ', optionsRow('yesNo', rc.audioRecorded), gap(),
+      optionsRow('sessionMode', rc.sessionMode)));
     append(box1, append(el('div', 'r-line'),
-      'Recording device/platform: ', blank(rc.recordingDevice, 'l'), '   Mouth-to-mic (cm): ', blank(rc.mouthToMicCm, 's')));
+      'Environment: ', optionsRow('environment', rc.environment)));
+    append(box1, append(el('div', 'r-line'),
+      pair('Recording device/platform: ', blank(rc.recordingDevice, 'l')), gap(),
+      pair('Mouth-to-mic (cm): ', blank(rc.mouthToMicCm, 's'))));
     form.appendChild(box1);
 
     var st = s.stimuli;
@@ -136,11 +146,13 @@
     var rt = s.ratingConditions;
     var box2 = el('div', 'r-box');
     append(box2, append(el('div', 'r-line'), el('b', null, 'Rating Conditions: '),
-      optionsRow('ratingSource', rt.ratingSource), '    ', optionsRow('playback', rt.playback),
-      '    Auditory anchors: ', optionsRow('yesNo', rt.auditoryAnchors)));
+      optionsRow('ratingSource', rt.ratingSource), gap(), optionsRow('playback', rt.playback)));
     append(box2, append(el('div', 'r-line'),
-      'Rater: ', blank(opts.removeStaff ? '[removed]' : rt.rater, 'm'), '   Date: ', blank(rt.ratingDate, 'm'),
-      '   Number of times sample was played: ', blank(rt.timesPlayed, 's')));
+      'Auditory anchors: ', optionsRow('yesNo', rt.auditoryAnchors)));
+    append(box2, append(el('div', 'r-line'),
+      pair('Rater: ', blank(opts.removeStaff ? '[removed]' : rt.rater, 'm')), gap(),
+      pair('Date: ', blank(rt.ratingDate, 'm')), gap(),
+      pair('Number of times sample was played: ', blank(rt.timesPlayed, 's'))));
     form.appendChild(box2);
 
     // Direction-only end labels; no severity bands or colors.
@@ -567,26 +579,37 @@
     document.getElementById('report-code-note').hidden = !(opts.deidentify && opts.speakerCode === '[removed]');
   }
 
-  // First times the report was opened and printed, for the progress bar.
-  // Bookkeeping only: they are saved with the next save, without marking
-  // the session as changed.
-  function noteProgress(key) {
-    var session = app.getSession();
-    if (!session.progress[key]) { session.progress[key] = S.isoNow(); }
-    app.renderSteps();
+  // Two views: 'form' and 'report'. setView is the only place that
+  // switches between them, so the two switches below always change
+  // together: the body.report-mode class (the CSS uses it to hide the app
+  // bar, the form page, and the floating player) and the hidden attribute
+  // of #report-view.
+  // The print styles always print #report-view, from either view. Every
+  // print (the Print button or the browser's own Print, e.g. Ctrl+P) first
+  // redraws the report and records reportPrintedAt (beforePrint, below).
+  // The report options are tick-boxes on the page and are not saved in
+  // the session.
+  function setView(view) {
+    var showReport = view === 'report';
+    document.body.classList.toggle('report-mode', showReport);
+    document.getElementById('report-view').hidden = !showReport;
   }
 
   function open() {
     renderReport();
-    noteProgress('reportOpenedAt');
-    document.body.classList.add('report-mode');
-    document.getElementById('report-view').hidden = false;
+    app.noteProgress('reportOpenedAt');   // step 4 "in progress"
+    setView('report');
     window.scrollTo(0, 0);
   }
 
   function close() {
-    document.body.classList.remove('report-mode');
-    document.getElementById('report-view').hidden = true;
+    setView('form');
+  }
+
+  // Runs just before any print, so what is printed is up to date.
+  function beforePrint() {
+    renderReport();
+    app.noteProgress('reportPrintedAt');   // step 4 complete
   }
 
   function init(shared) {
@@ -594,11 +617,13 @@
     document.getElementById('btn-report').addEventListener('click', open);
     document.getElementById('btn-report-2').addEventListener('click', open);
     document.getElementById('report-back').addEventListener('click', close);
+    // The button calls beforePrint itself too, in case a browser does not
+    // send "beforeprint" for window.print(); running it twice is harmless.
     document.getElementById('report-print').addEventListener('click', function () {
-      renderReport();
-      noteProgress('reportPrintedAt');
+      beforePrint();
       window.print();
     });
+    window.addEventListener('beforeprint', beforePrint);
     ['report-deidentify', 'report-remove-staff', 'report-include-summary', 'report-include-emr'].forEach(function (id) {
       document.getElementById(id).addEventListener('change', renderReport);
     });

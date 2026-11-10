@@ -90,6 +90,8 @@
     return w;
   }
 
+  // session.acoustics: null (not imported) -> imported -> replaced by the
+  // next import. Nothing sets it back to null except a New session.
   function importText(text, fileName) {
     var session = app.getSession();
     var r;

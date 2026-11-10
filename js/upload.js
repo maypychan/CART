@@ -51,6 +51,14 @@
 
   function fileKey(name, size) { return name + '|' + size; }
 
+  // Is this entry's audio in memory in this window? After loading a
+  // session it is not, until the same file is added again.
+  function isLoaded(entry) { return !!audioFiles[fileKey(entry.originalName, entry.sizeBytes)]; }
+
+  // Can it be played? Loaded, and its WAV header could be read. Excluded
+  // takes are still playable (they are shown greyed out).
+  function isPlayable(entry) { return isLoaded(entry) && !entry.formatError; }
+
   function taskName(id) {
     for (var i = 0; i < TASKS.length; i++) { if (TASKS[i][0] === id) { return TASKS[i][1]; } }
     return id;
@@ -181,6 +189,10 @@
           headerNote: info.note || '',
           playCount: 0
         });
+      }).catch(function () {
+        // The browser could not read the file (e.g. it was moved or is
+        // locked): report it with the other skipped files, add the rest.
+        skipped.push(file.name + ': the browser could not read this file.');
       });
     });
     Promise.all(jobs).then(function () {
@@ -213,6 +225,12 @@
     session.audio.files = session.audio.files.filter(function (f) { return f.id !== id; });
     app.markDirty();
     render();
+  }
+
+  // Stops any recording that is playing (used on Load: the audio stays in
+  // memory so the same files reconnect, but nothing keeps playing).
+  function pauseAll() {
+    Object.keys(players).forEach(function (k) { players[k].pause(); });
   }
 
   function forgetAllAudio() {
@@ -292,6 +310,11 @@
   // ---------------------------------------------------------------------
 
   // Returns { errors: [...], warnings: [...], rows: { id: { errors, warnings } } }
+  // Each file is in one of these states: unreadable (formatError), not
+  // loaded in this window (in the session but its audio was not added
+  // again after Load), no task, excluded (skipped here and in the
+  // package), or ready. "Loaded" and "playable" are decided by isLoaded
+  // and isPlayable (top of this file).
   function validate(session) {
     var a = session.audio;
     var errors = [], warnings = [], rows = {};
@@ -320,10 +343,9 @@
     }
     a.files.forEach(function (f) {
       var r = { errors: [], warnings: [] };
-      var key = fileKey(f.originalName, f.sizeBytes);
       if (f.excluded) { rows[f.id] = r; return; }
       if (f.formatError) { r.errors.push(f.formatError); }
-      if (!audioFiles[key]) { r.errors.push('Not loaded in this window. Add this file again (same file) to play or export it, or remove it.'); }
+      if (!isLoaded(f)) { r.errors.push('Not loaded in this window. Add this file again (same file) to play or export it, or remove it.'); }
       if (!f.task) { r.errors.push('Choose a task for this file.'); }
       if (!f.formatError && f.sampleRateHz) {
         if (f.sampleRateHz < 10000) { r.warnings.push('Sample rate ' + f.sampleRateHz + ' Hz: CPPS needs at least 10000 Hz and will be reported as not available.'); }
@@ -417,6 +439,10 @@
   // <audio> elements as the Recordings list so play counts stay consistent.
   // ---------------------------------------------------------------------
 
+  // States: absent (#float-player hidden: nothing playable), open, or
+  // collapsed (floatHidden; never reset by New or Load). CSS also hides it
+  // in the report view; audio keeps playing there. Starting a recording
+  // here pauses the others; the players in the Recordings list do not.
   var floatHidden = false;   // "Hide" state, for this window only
 
   function mmss(t) {
@@ -432,7 +458,7 @@
     var plan = planNames(session);
     var playable = plan.filter(function (p) {
       var f = p.entry;
-      return audioFiles[fileKey(f.originalName, f.sizeBytes)] && !f.formatError;
+      return isPlayable(f);
     });
     box.hidden = playable.length === 0;
     listEl.hidden = floatHidden;
@@ -513,7 +539,7 @@
       // The same player is reused on every redraw so playback is not interrupted.
       var playerCell = el('div', 'rec-player');
       var counter = el('span', 'play-count', 'played ' + (f.playCount || 0) + '×');
-      if (audioFiles[key] && !f.formatError) {
+      if (isPlayable(f)) {
         var audio = getPlayer(key, f.originalName);
         audio._counter = counter;
         playerCell.appendChild(audio);
@@ -631,7 +657,7 @@
 
   function hasPlayableAudio() {
     return app.getSession().audio.files.some(function (f) {
-      return audioFiles[fileKey(f.originalName, f.sizeBytes)] && !f.formatError;
+      return isPlayable(f);
     });
   }
 
@@ -696,6 +722,7 @@
       return entry && entry.excluded ? { reason: entry.excludedReason || '' } : null;
     },
     forgetAllAudio: forgetAllAudio,
+    pauseAll: pauseAll,
     hasPlayableAudio: hasPlayableAudio,
     // exposed for testing in the browser console
     _parseWavHeader: parseWavHeader,

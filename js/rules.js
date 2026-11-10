@@ -95,7 +95,12 @@
     return { key: S.newId().slice(0, 8), id: measureId, value: null, condition: null, text: '', settings: null };
   }
 
-  // "Filled in" = the clinic has entered something, so the rule is in use.
+  // Rule states: 'empty' (unused, silent), 'incomplete' (inactive; the
+  // Documentation area shows a note saying why) and 'active'. They are
+  // decided by ruleState and referenceState (below checkRanges).
+  // "Filled in" = the clinic has entered something, so the rule is in use;
+  // it drives step 3 of the progress bar. A label of only spaces counts
+  // as empty, here and in checkRanges.
   function rangesFilled(ranges) {
     return ranges.some(function (r) { return r.min !== null || r.max !== null || (r.label && r.label.trim()); });
   }
@@ -112,19 +117,24 @@
   }
 
   // Older files had a "Use this rule" switch per rule. Rules that were
-  // filled in but switched off are held back here (not silently made
-  // active) until the clinician chooses to keep or delete each one.
-  // Each entry: { label, detail, restore(rules) }.
-  var pendingDisabled = [];
-  var pendingFromFile = false;
+  // filled in but switched off are held back (not silently made active)
+  // until the clinician chooses to keep or delete each one.
+  // Flow: normalize() returns them as its "held" list -> the caller passes
+  // that list to showPendingDialog, with where it came from ('session
+  // file': after the page is drawn; 'rules file': at once) -> the dialog
+  // cannot be skipped -> Apply restores the kept ones. Until then none of
+  // them is used.
 
   // Loaded files are untrusted, so anything missing or invalid is reset.
   // Rule sets from schema 0.1.0 are migrated: primaryFeature -> ranking,
   // thresholds -> references, comparisons dropped.
+  // Returns { rules, held }. held lists the switched-off rules, each as
+  // { label, detail, restore(rules) }; it is empty for newer files.
   function normalize(r) {
     var out = blankRules();
-    if (!r || typeof r !== 'object') { return out; }
-    function held(label, detail, restore) { pendingDisabled.push({ label: label, detail: detail, restore: restore }); }
+    var heldList = [];
+    if (!r || typeof r !== 'object') { return { rules: out, held: heldList }; }
+    function held(label, detail, restore) { heldList.push({ label: label, detail: detail, restore: restore }); }
     function num(v) { return (typeof v === 'number' && isFinite(v)) ? v : null; }
     function str(v) { return typeof v === 'string' ? v : ''; }
     function ranges(list, n) {
@@ -208,15 +218,21 @@
       if (r.summary.takes === 'mean' || r.summary.takes === 'each') { out.summary.takes = r.summary.takes; }
       if (r.summary.combineTasks === 'mean' || r.summary.combineTasks === 'separate') { out.summary.combineTasks = r.summary.combineTasks; }
     }
-    return out;
+    return { rules: out, held: heldList };
   }
 
+  // Checks a session's rules once (marked by the hidden _normalized flag;
+  // a JSON copy loses it). form.js calls it first, when a session is made
+  // or loaded; the other calls are "just in case" and only return them.
   function ensure(session) {
     if (!session.rules) { session.rules = lastLoadedRules ? S.clone(lastLoadedRules) : blankRules(); }
     else if (!session.rules._normalized) {
-      session.rules = normalize(session.rules);
+      var checked = normalize(session.rules);
+      session.rules = checked.rules;
       // A loaded session's rules copy: ask after the page has been drawn.
-      if (pendingDisabled.length) { pendingFromFile = false; setTimeout(showPendingDialog, 0); }
+      if (checked.held.length) {
+        setTimeout(function () { showPendingDialog(checked.held, 'session file'); }, 0);
+      }
     }
     Object.defineProperty(session.rules, '_normalized', { value: true, enumerable: false, configurable: true });
     return session.rules;
@@ -226,7 +242,9 @@
   // guessing which label applies. Returns { ok, error, ranges }, with
   // empty: true when nothing has been entered (the rule is simply unused).
   function checkRanges(list, min0, max0) {
-    var rows = list.filter(function (r) { return r.min !== null || r.max !== null || r.label; });
+    // A row counts as entered if it has a number or a label that is not
+    // just spaces (the same test as rangesFilled, which drives step 3).
+    var rows = list.filter(function (r) { return r.min !== null || r.max !== null || (r.label && r.label.trim()); });
     if (!rows.length) { return { ok: false, empty: true, error: 'No ranges have been entered.' }; }
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i];
@@ -247,6 +265,38 @@
     if (!ref.condition) { return 'no condition chosen (below or above)'; }
     if (!ref.text.trim()) { return 'no generated text entered'; }
     return null;
+  }
+
+  // The state of one rule, in one place, for the editor and the
+  // Documentation area: { state, reason }.
+  //   state: 'empty' (nothing entered: the rule is unused and silent),
+  //          'incomplete' (inactive; reason says why) or 'active'.
+  // kind: 'severity', 'descriptors' or 'ranking'. For the two range rules
+  // the result also has check: the checkRanges result (its sorted ranges
+  // are what an active rule applies).
+  function ruleState(rules, kind) {
+    if (kind === 'severity' || kind === 'descriptors') {
+      var check = checkRanges(rules[kind].ranges, 0, 100);
+      if (check.empty) { return { state: 'empty', reason: null, check: check }; }
+      if (!check.ok) { return { state: 'incomplete', reason: check.error, check: check }; }
+      // Descriptors apply to the ticked attributes, so with none ticked
+      // the rule can never say anything (like ranking, below).
+      if (kind === 'descriptors' && !rules.descriptors.attributes.length) {
+        return { state: 'incomplete', reason: 'No attributes are ticked.', check: check };
+      }
+      return { state: 'active', reason: null, check: check };
+    }
+    // Ranking is used once a minimum score is entered.
+    if (rules.ranking.minScore === null) { return { state: 'empty', reason: null }; }
+    if (!rules.ranking.attributes.length) { return { state: 'incomplete', reason: 'no attributes are ticked' }; }
+    return { state: 'active', reason: null };
+  }
+
+  // The same for one clinic reference value.
+  function referenceState(ref) {
+    if (referenceEmpty(ref)) { return { state: 'empty', reason: null }; }
+    var problem = referenceProblem(ref);
+    return problem ? { state: 'incomplete', reason: problem } : { state: 'active', reason: null };
   }
 
   // Stored as text so they compare directly with results.json settings.
@@ -275,15 +325,18 @@
   // Old rules that were switched off: keep or delete each one
   // ---------------------------------------------------------------------
 
-  function showPendingDialog() {
-    if (!pendingDisabled.length) { return; }
-    var items = pendingDisabled;
-    pendingDisabled = [];
+  // items: the "held" list from normalize(). source: 'session file' or
+  // 'rules file', where the rules came from. It is used in the wording,
+  // and kept rules from a rules file also become the rules for New
+  // sessions in this window.
+  function showPendingDialog(items, source) {
+    if (!items.length) { return; }
+    var fromRulesFile = source === 'rules file';
     var dlg = document.getElementById('rules-disabled-dialog');
     var body = document.getElementById('rules-disabled-body');
     body.innerHTML = '';
     body.appendChild(el('p', null, 'These rules were filled in but switched off in the older ' +
-      (pendingFromFile ? 'rules file' : 'session file') + '. This version has no on/off switch: a filled-in rule is always used. ' +
+      (fromRulesFile ? 'rules file' : 'session file') + '. This version has no on/off switch: a filled-in rule is always used. ' +
       'Choose whether to keep (use) or delete each one. Until you decide, none of them is used.'));
     var choices = items.map(function () { return null; });
     var apply = document.getElementById('rules-disabled-apply');
@@ -318,7 +371,7 @@
       var session = app.getSession();
       var kept = 0;
       items.forEach(function (it, i) { if (choices[i] === 'keep') { it.restore(session.rules); kept++; } });
-      if (pendingFromFile) { lastLoadedRules = S.clone(session.rules); }
+      if (fromRulesFile) { lastLoadedRules = S.clone(session.rules); }
       dlg.close();
       app.markDirty();
       renderEditor();
@@ -368,8 +421,8 @@
       return false;
     }
     var session = app.getSession();
-    pendingDisabled = [];
-    session.rules = normalize(data);
+    var checked = normalize(data);
+    session.rules = checked.rules;
     Object.defineProperty(session.rules, '_normalized', { value: true, enumerable: false, configurable: true });
     lastLoadedRules = S.clone(session.rules);
     app.markDirty();
@@ -377,7 +430,7 @@
     app.render();
     app.showMessage('info', 'Loaded rules: ' + (session.rules.name || fileName),
       ['These rules are now used for this session and for new sessions in this window.']);
-    if (pendingDisabled.length) { pendingFromFile = true; showPendingDialog(); }
+    if (checked.held.length) { showPendingDialog(checked.held, 'rules file'); }
     return true;
   }
 
@@ -509,6 +562,7 @@
     tieL.appendChild(numberInput(rules.ranking, 'tieMargin', EXAMPLES.tieMargin, changed, { min: 0, max: 100 }));
     rkRow.appendChild(tieL);
     rk.appendChild(rkRow);
+    rk.appendChild(el('p', 'rule-check')).id = 'check-ranking';
     box.appendChild(rk);
 
     var ds = el('fieldset', 'rule');
@@ -558,7 +612,11 @@
       sel.addEventListener('change', function () { ref.condition = sel.value || null; changed(); });
       c3.appendChild(sel);
       tr.appendChild(c3);
-      var c4 = el('td'); var ti = textInput(ref, 'text', '', changed); ti.setAttribute('aria-label', 'Generated text for ' + def.label); c4.appendChild(ti); tr.appendChild(c4);
+      var c4 = el('td'); var ti = textInput(ref, 'text', '', changed); ti.setAttribute('aria-label', 'Generated text for ' + def.label); c4.appendChild(ti);
+      // Status of this reference value (Empty / Inactive / Active), kept up
+      // to date by refreshStatus.
+      c4.appendChild(el('div', 'rule-check')).id = 'check-ref-' + ref.key;
+      tr.appendChild(c4);
       var c5 = el('td');
       var rm = el('button', 'small', 'Remove'); rm.type = 'button';
       rm.addEventListener('click', function () { rules.references = rules.references.filter(function (x) { return x !== ref; }); changed(); renderEditor(); });
@@ -649,15 +707,27 @@
   function refreshStatus() {
     var session = app.getSession();
     var r = session.rules;
-    function show(id, check) {
+    // Every rule has a status line: "Empty (not used).", "Inactive: <why>"
+    // (shown as an error) or "Active…".
+    function show(id, st, activeText) {
       var e = document.getElementById(id);
       if (!e) { return; }
-      if (check.empty) { e.textContent = 'Empty (not used).'; e.className = 'rule-check'; return; }
-      e.textContent = check.ok ? 'Active: ' + check.ranges.length + ' range(s).' : 'Inactive: ' + check.error;
-      e.className = 'rule-check' + (check.ok ? '' : ' is-error');
+      if (st.state === 'empty') { e.textContent = 'Empty (not used).'; e.className = 'rule-check'; return; }
+      var why = st.reason ? cap(st.reason) + (/\.$/.test(st.reason) ? '' : '.') : '';
+      e.textContent = st.state === 'active' ? activeText : 'Inactive: ' + why;
+      e.className = 'rule-check' + (st.state === 'active' ? '' : ' is-error');
     }
-    show('check-severity', checkSeverity(r));
-    show('check-descriptors', checkRanges(r.descriptors.ranges, 0, 100));
+    function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
+    // check.ranges exists only when the ranges are valid.
+    function rangesActive(st) { return st.state === 'active' ? 'Active: ' + st.check.ranges.length + ' range(s).' : ''; }
+    var sev = ruleState(r, 'severity');
+    show('check-severity', sev, rangesActive(sev));
+    var desc = ruleState(r, 'descriptors');
+    show('check-descriptors', desc, rangesActive(desc));
+    show('check-ranking', ruleState(r, 'ranking'), 'Active: up to ' + r.ranking.maxRanks + ' rank(s), minimum score ' + r.ranking.minScore + '.');
+    r.references.forEach(function (ref) {
+      show('check-ref-' + ref.key, referenceState(ref), 'Active.');
+    });
   }
 
   function init(shared) {
@@ -683,6 +753,8 @@
     checkRanges: checkRanges,
     referenceProblem: referenceProblem,
     referenceEmpty: referenceEmpty,
+    ruleState: ruleState,
+    referenceState: referenceState,
     anyFilled: anyFilled,
     settingsDifferences: settingsDifferences,
     renderEditor: renderEditor

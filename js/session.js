@@ -418,6 +418,11 @@
 
   // Returns { session, warnings }; throws an Error with a user-facing
   // message if the file cannot be used.
+  // Rejected: not JSON, not an object, a results file, another file type,
+  // no schemaVersion, or a newer schema. Otherwise accepted: obsolete
+  // fields are dropped, missing ones filled in, invalid values cleared,
+  // each with a note. Rules and documentation are checked next, by the
+  // caller (form.js adoptSession: rules.js ensure, summary.js ensureDoc).
   function parseSessionText(text) {
     var data;
     try {

@@ -32,6 +32,14 @@ is separate software and is not included.
 
 A step-by-step guide is in [`docs/QUICK_START.md`](docs/QUICK_START.md).
 
+**Learn it:** a written
+[tutorial with screenshots](https://maypychan.github.io/CART/tutorial/).
+It is also in the download: open `tutorial/index.html`.
+
+**Watch it:** a captioned
+[walkthrough video on YouTube](https://www.youtube.com/playlist?list=PLdwLkAt6EnWw)
+(Part 1: the basics; Part 2: more options; about 3 minutes each).
+
 ## Overview
 
 The tool follows the order of a voice evaluation:
@@ -115,6 +123,7 @@ praat/
   cape_settings_template.tsv   example settings file for running the script by hand
 docs/
   QUICK_START.md         step-by-step guide
+tutorial/                written tutorial with screenshots (open tutorial/index.html)
 
 tools/
   sync-praat-script.ps1  for developers only

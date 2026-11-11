@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CART Tutorial</title>
+<!-- The CART tutorial. Works offline: open this file in a web browser. Nothing is downloaded. -->
+<link rel="stylesheet" href="css/tutorial.css">
+</head>
+<body>
+
+<!-- ===================================================== Left rail: contents -->
+<nav class="rail" aria-label="Tutorial contents">
+  <div class="rail-head">
+    <div>
+      <div class="kicker">Tutorial</div>
+      <div class="name">CART</div>
+      <div class="sub">CAPE-Vr Clinical Acoustic Reporting Tool</div>
+      <div class="progress" aria-hidden="true"><span></span></div>
+    </div>
+    <button type="button" class="menu-btn" aria-expanded="false">Contents</button>
+  </div>
+  <div class="toc" id="toc"></div>
+  <div class="rail-foot">
+    Click any screenshot to enlarge it.<br>
+    <a href="#top">Back to the start</a>
+  </div>
+</nav>
+
+<div class="page">
+<main class="content" id="top">
+
+<!-- ===================================================== Title block -->
+<header class="title-block">
+  <div class="kicker">Step-by-step tutorial</div>
+  <h1>Using CART</h1>
+  <p class="subtitle">Rate with the CAPE-Vr, add acoustics from Praat if you want them, and print one report</p>
+  <div class="meta">
+    <span><b>CART</b> version 0.1.0</span>
+    <span><b>Praat</b> 7.0.02 (Windows) used for the screenshots</span>
+    <span><b>Updated</b> 10 November 2026</span>
+  </div>
+</header>
+
+<section class="abstract" aria-labelledby="abs-title">
+  <h2 id="abs-title">About this tutorial</h2>
+  <p>CART (the <b>CAPE-Vr Clinical Acoustic Reporting Tool</b>) runs in your web browser. It helps you
+    complete the CAPE-Vr, can prepare an acoustic analysis that you run in your own copy of Praat, and turns
+    everything into one printable report.</p>
+  <p>The tutorial has three parts. Read Part 1 first; Parts 2 and 3 are for when you need them.</p>
+  <ul>
+    <li><b>Part 1 · The essentials:</b> the shortest path from a blank form to a PDF report, plus the
+      optional Praat analysis.</li>
+    <li><b>Part 2 · More options:</b> speaker profiles and Praat settings, clinic-defined rules, the
+      Clinical Summary and EMR draft, CSV export, and privacy options.</li>
+    <li><b>Part 3 · Use CART offline:</b> download CART from GitHub once, and use it with no internet.</li>
+  </ul>
+  <p class="muted" style="font-size:0.88rem">The demo speaker (“Jordan Example”) is fictional and the
+    recordings are synthetic, made in Praat. Example rule values are placeholders, not published cut-offs.</p>
+</section>
+
+<h2 class="sec" id="before"><span class="secnum">0</span>Before you start</h2>
+<p>CART follows the order of a voice evaluation in four steps. <b>Only the CAPE-Vr form is required.</b>
+  The acoustic analysis and the documentation tools are optional: you can skip either one, or both, and
+  still save your session and print a report.</p>
+
+<div class="path" role="img" aria-label="CART's four steps: 1 CAPE-Vr form (required), 2 Acoustics (optional), 3 Documentation (optional), 4 Report">
+  <div class="node"><span class="mark">1</span><b>CAPE-Vr form</b><span class="req">Required</span></div>
+  <div class="arrow" aria-hidden="true">→</div>
+  <div class="node opt"><span class="mark">2</span><b>Acoustics</b><span class="req">Optional · uses Praat</span></div>
+  <div class="arrow" aria-hidden="true">→</div>
+  <div class="node opt"><span class="mark">3</span><b>Documentation</b><span class="req">Optional</span></div>
+  <div class="arrow" aria-hidden="true">→</div>
+  <div class="node"><span class="mark">4</span><b>Report</b><span class="req">Print or save as PDF</span></div>
+</div>
+
+<h3 class="sub" id="before-need">What you need</h3>
+<table class="tbl">
+  <thead><tr><th>For</th><th>You need</th></tr></thead>
+  <tbody>
+    <tr><td>The CAPE-Vr form and the report</td><td>A web browser. Chrome or Edge is recommended; Firefox should work.
+      Nothing to install.</td></tr>
+    <tr><td>Acoustic analysis <i>(optional)</i></td><td>Your recordings as <b>WAV</b> files, and
+      <a href="https://www.praat.org">Praat</a> (free; tested with version 7.0.02). Praat is separate software,
+      not part of CART.</td></tr>
+    <tr><td>Using CART with no internet <i>(optional)</i></td><td>A one-time download of CART (see Part 3).</td></tr>
+  </tbody>
+</table>
+
+<h3 class="sub" id="before-read">How to read the boxes</h3>
+<div class="callout optional"><span class="ct">Optional</span><p>A step you can skip.</p></div>
+<div class="callout tip"><span class="ct">Tip</span><p>A shortcut or good habit.</p></div>
+<div class="callout caution"><span class="ct">Caution</span><p>Something that can lose work or reveal names.</p></div>
+<p>Grey boxes in a monospaced font, like the one below, show file names, folder contents, or the text inside a file.
+  The small label in the corner says what it is. You never need to type them in.</p>
+<div class="chunk"><span class="label">file name</span><pre>Jordan-Example_capevr_2026-11-10.json</pre></div>
+
+<!-- ===================================================== PART 1 -->
+<section class="part" id="part1" data-toc="Part 1 · The essentials">
+  <div class="tag">Part 1 · The essentials</div>
+  <div class="body">
+    <h1>Form → Save → Report</h1>
+    <p>The minimum is three moves: fill in the CAPE-Vr form, save the session, print the report. Sections 1–4
+      cover that. Sections 5–7 add the optional acoustic analysis with Praat, which you can do the same day or
+      leave out entirely.</p>
+  </div>
+</section>
+
+<h2 class="sec" id="open"><span class="secnum">1</span>Open CART</h2>
+<p>Use CART either way; both work the same:</p>
+<ul>
+  <li><b>Online:</b> open <a href="https://maypychan.github.io/CART/">maypychan.github.io/CART</a>.</li>
+  <li><b>On your own computer, without internet:</b> double-click <code>index.html</code> in the CART
+    folder (Part 3 shows how to get it).</li>
+</ul>
+<p>Either way, nothing is installed, nothing is stored in the browser, and nothing you enter is sent anywhere.
+  Your work is kept only in files you save.</p>
+
+<figure>
+  <img class="shot" src="img/p1_01_open.png" alt="CART when it opens: a dark rail on the left with four numbered steps, and the blank CAPE-Vr form on the right" loading="lazy">
+  <figcaption>CART when it opens. The rail on the left shows the four steps; the CAPE-Vr form fills the page.</figcaption>
+</figure>
+
+<p>The rail lists the four steps in page order. Click a step to jump to it. Each step’s circle shows how far you are:</p>
+<div class="fig-pair">
+  <figure class="narrow">
+    <img class="shot" src="img/p1_02_rail.png" alt="The four steps in the rail, none started" loading="lazy">
+    <figcaption>The four steps. Click one to jump there.</figcaption>
+  </figure>
+  <div>
+    <table class="tbl">
+      <thead><tr><th>Circle</th><th>Means</th></tr></thead>
+      <tbody>
+        <tr><td>Empty</td><td>Not started</td></tr>
+        <tr><td>Teal outline</td><td>In progress</td></tr>
+        <tr><td>Filled, with a check mark</td><td>Complete</td></tr>
+      </tbody>
+    </table>
+    <p>At the foot of the rail are <span class="ui">New</span>, <span class="ui">Load…</span>,
+      <span class="ui">Save</span>, and <span class="ui">Report…</span></p>
+  </div>
+</div>
+
+<h2 class="sec" id="form"><span class="secnum">2</span>Fill in the CAPE-Vr form</h2>
+<p>Work from top to bottom, as on the paper CAPE-Vr. Every field is optional; fill in what applies.</p>
+
+<h3 class="sub" id="form-header"><span class="secnum">2.1</span>Speaker details and recording conditions</h3>
+<p>Type the Name/ID, gender, age, examiner, and date. For the options (Yes/No, In person/Virtual, Environment),
+  <b>click to choose</b>; <b>click again to un-choose</b>. The chosen option is outlined, like circling it on paper.</p>
+<figure>
+  <img class="shot" src="img/p1_03_header.png" alt="The top of the form filled in: Jordan Example, M, 45, A. Clinician, with Yes, In person, and Clinic room chosen" loading="lazy">
+  <figcaption>The top of the form, filled in. Chosen options are outlined in teal.</figcaption>
+</figure>
+
+<h3 class="sub" id="form-rating"><span class="secnum">2.2</span>Rating conditions</h3>
+<p>Further down, record how you rated: live or recorded voice, headphones or speakers, auditory anchors, the rater,
+  the date, and how many times the sample was played.</p>
+<figure>
+  <img class="shot" src="img/p1_04_ratecond.png" alt="Rating Conditions filled in: Recorded voice, Headphones, anchors No, rater A. Clinician, played 2 times" loading="lazy">
+  <figcaption>Rating Conditions.</figcaption>
+</figure>
+
+<h3 class="sub" id="form-vas"><span class="secnum">2.3</span>Rate on the lines</h3>
+<p>Click or drag on a line to place your mark. The arrow keys move it by 1, and Page Up / Page Down by 10.
+  <span class="ui">Clear</span> returns a line to not rated.</p>
+<p>The numbers are <b>hidden while you rate</b>, so you rate from the line alone. Tick
+  <b>Show numerical values</b> to see the scores (0–100). Scores are saved either way.</p>
+<div class="fig-pair">
+  <figure>
+    <img class="shot" src="img/p1_05_vas_hidden.png" alt="Four rating lines with marks, numbers hidden" loading="lazy">
+    <figcaption>Rated, with the numbers hidden (the default).</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="img/p1_06_vas_numbers.png" alt="The same lines with Show numerical values ticked: 34, 30, 18, 22" loading="lazy">
+    <figcaption>With <b>Show numerical values</b> ticked.</figcaption>
+  </figure>
+</div>
+<div class="callout"><span class="ct">Note</span>
+  <p>The lines have only the end labels <i>Normal</i> and <i>Extreme</i>, as in the CAPE-Vr. There are no severity
+    labels or colors on the form.</p>
+</div>
+
+<h3 class="sub" id="form-desc"><span class="secnum">2.4</span>Descriptive ratings and overall impression</h3>
+<p>Choose Pitch, Loudness, Resonance, and Nasality (each with an optional comment), then Inconsistencies,
+  Instabilities, Additional features, and your Overall Impression.</p>
+<figure>
+  <img class="shot" src="img/p1_07_descriptive.png" alt="Pitch, Loudness, Resonance and Nasality all set to Normal, Inconsistencies set to None" loading="lazy">
+  <figcaption>Descriptive ratings.</figcaption>
+</figure>
+
+<h2 class="sec" id="save"><span class="secnum">3</span>Save your session</h2>
+<p>Click <span class="ui">Save</span> at the foot of the rail at any time. Your session downloads as a file:</p>
+<div class="chunk"><span class="label">session file</span><pre>Jordan-Example_capevr_2026-11-10.json</pre></div>
+<p>The small dot on <span class="ui">Save</span> is <b style="color:var(--amber-ink)">orange</b> when there are
+  unsaved changes and <b style="color:var(--ok)">green</b> when everything is saved. When the form is saved, step 1 shows
+  a check mark.</p>
+<figure>
+  <img class="shot" src="img/p1_08_saved.png" alt="After saving: step 1 has a check mark and the Save button has a green dot" loading="lazy">
+  <figcaption>Saved: step 1 is complete, and the dot on <b>Save</b> is green.</figcaption>
+</figure>
+<p>To continue later, click <span class="ui">Load…</span> and choose that file.</p>
+<div class="callout caution"><span class="ct">Caution</span>
+  <p>CART keeps your work only in the files you save. If you close the browser without saving, the changes are lost
+    (the browser warns you first). The session file contains the speaker’s details: store it as your workplace requires.</p>
+</div>
+
+<h2 class="sec" id="report-min"><span class="secnum">4</span>Print the report</h2>
+<p>Click <span class="ui">Report…</span> (in the rail, or <b>Generate and print report…</b> at the bottom of the page).
+  The report opens as a print view: the CAPE-Vr form, filled in.</p>
+<figure>
+  <img class="shot" src="img/p1_09_report_formonly.png" alt="The report view: a toolbar with Back to the form and Print / Save as PDF, then the printed CAPE-Vr form with the chosen options circled" loading="lazy">
+  <figcaption>The report with the CAPE-Vr form only. Chosen options are circled, as on paper.</figcaption>
+</figure>
+<p>Click <span class="ui primary">Print / Save as PDF</span>. In the print dialog, choose your printer, or
+  <b>Save as PDF</b> as the destination. <span class="ui">← Back to the form</span> returns to the form.</p>
+
+<div class="callout done"><span class="ct">That’s the minimum</span>
+  <p>Form → Save → Report. If you only need the CAPE-Vr, you are done. Everything from here on is optional.</p>
+</div>
+
+<h2 class="sec" id="acoustics"><span class="secnum">5</span>Acoustic analysis with Praat <span class="badge">optional</span></h2>
+<p>CART does not compute acoustic measures itself. Instead it prepares a <b>Praat package</b>: your WAV files,
+  renamed by task, plus a settings file and a Praat script. You run the script in your own Praat, which writes a
+  <code>results.json</code> file. You then import that file into CART.</p>
+<div class="chunk"><span class="label">the round trip</span><pre>CART: add WAVs ─► Make Praat package (.zip)
+                              │
+Praat:          unzip ─► Open Praat script… ─► Run ─► results.json
+                                                          │
+CART: Import results.json… ◄──────────────────────────────┘</pre></div>
+
+<h3 class="sub" id="ac-add"><span class="secnum">5.1</span>Add your recordings</h3>
+<p>Open <b>2 · Acoustic analysis with Praat</b> by clicking its header.</p>
+<figure>
+  <img class="shot" src="img/p1_10_acoustic_closed.png" alt="The closed header of step 2: 2 · Acoustic analysis with Praat, optional" loading="lazy">
+  <figcaption>Step 2 starts closed. Click its header to open it.</figcaption>
+</figure>
+<p>Drag your WAV files onto the Recordings area, or click <span class="ui">Add WAV files…</span>. Each file gets a
+  CAPE-Vr task, <b>suggested from its file name</b>. Check each suggestion and change any that are wrong.</p>
+<figure>
+  <img class="shot" src="img/p1_11_recordings.png" alt="The recordings list: each WAV with its duration and sample rate, a player, its task, and the name it will have in the package. A floating Recordings player is at the bottom right." loading="lazy">
+  <figcaption>Recordings, each with a task (“suggested from file name”), a player, and its new name in the package.
+    CART reads only each file’s duration, sample rate, channels, and bit depth.</figcaption>
+</figure>
+<p>A small <b>Recordings</b> player also appears in the corner, so you can listen while you rate the form.
+  <span class="ui">Hide</span> shrinks it.</p>
+<figure class="narrow">
+  <img class="shot" src="img/p1_12_player.png" alt="The floating player listing each task with a play button" loading="lazy">
+  <figcaption>The floating player.</figcaption>
+</figure>
+<div class="callout tip"><span class="ct">Tip</span>
+  <p>To listen while rating, add the recordings <i>before</i> you start the form.</p>
+</div>
+
+<h3 class="sub" id="ac-profile"><span class="secnum">5.2</span>Choose the speaker profile</h3>
+<p>Under <b>Speaker and analysis settings</b>, choose a speaker profile. It fills in the pitch floor, pitch ceiling,
+  and formant ceiling: the ranges Praat searches in. These are analysis settings, not norms for the speaker.</p>
+<figure>
+  <img class="shot" src="img/p1_13_profile.png" alt="Speaker profile with Adult male chosen; pitch floor 75, pitch ceiling 300, formant ceiling 5000" loading="lazy">
+  <figcaption>Choosing <b>Adult male</b> fills in 75–300 Hz for pitch and 5000 Hz for the formant ceiling.</figcaption>
+</figure>
+
+<h3 class="sub" id="ac-package"><span class="secnum">5.3</span>Make the Praat package</h3>
+<p>Click <span class="ui primary">Make Praat package…</span>. CART checks the files first (WAV format, a task for every
+  file, no duplicates). Check the list, then click <span class="ui primary">Download package</span>.</p>
+<figure>
+  <img class="shot" src="img/p1_14_export_dialog.png" alt="Make the Praat package dialog: a table of original file, task, and name in package, with Cancel and Download package buttons" loading="lazy">
+  <figcaption>The last check before download: each file, its task, and its name in the package.</figcaption>
+</figure>
+<p>You get one <code>.zip</code> file. Unzipped, it holds everything Praat needs:</p>
+<div class="chunk"><span class="label">Jordan-Example_praat_package.zip</span><pre><span class="k">Jordan-Example_praat_package/</span>
+  cape_acoustics.praat          <span class="c"># the Praat script</span>
+  cape_settings.tsv             <span class="c"># your settings (profile, methods)</span>
+  README.txt                    <span class="c"># how to run it</span>
+  Jordan-Example_vowel_a.wav    <span class="c"># your recordings, renamed by task</span>
+  Jordan-Example_vowel_i.wav
+  Jordan-Example_sentence_1.wav  …  Jordan-Example_sentence_6.wav
+  Jordan-Example_extemporaneous.wav</pre></div>
+
+<h3 class="sub" id="ac-praat"><span class="secnum">5.4</span>Run the package in Praat</h3>
+<p>This part happens in Praat, outside CART.</p>
+<ol class="steps">
+  <li><b>Unzip the package</b> so all its files sit together in one ordinary folder.
+    <div class="callout caution" style="margin-top:0.5rem"><span class="ct">Caution</span>
+      <p>Don’t run the script from inside the .zip. On Windows, right-click the .zip → <b>Extract All…</b>;
+        on a Mac, double-click it.</p></div>
+  </li>
+  <li><b>Open Praat.</b> Its Objects window appears.
+    <figure class="mid praat"><img class="shot" src="img/praat_01_objects.png" alt="The Praat Objects window" loading="lazy">
+      <figcaption>The Praat Objects window.</figcaption></figure>
+  </li>
+  <li>In the Objects window, choose <b>Praat → Open Praat script…</b>
+    <figure class="mid praat"><img class="shot" src="img/praat_02_menu.png" alt="The Praat menu open, with Open Praat script… in the list" loading="lazy">
+      <figcaption><b>Praat → Open Praat script…</b></figcaption></figure>
+  </li>
+  <li>Go to the unzipped package folder and choose <code>cape_acoustics.praat</code>.
+    <figure class="praat"><img class="shot" src="img/praat_03_dialog.png" alt="A file dialog showing the package folder: cape_acoustics, cape_settings.tsv, README, and the WAV files" loading="lazy">
+      <figcaption>Choose <code>cape_acoustics.praat</code> in the package folder. (These screenshots used a package
+        made with the speaker ID S001; see section 11.2.)</figcaption></figure>
+  </li>
+  <li>The script opens in a script window. Choose <b>Run → Run</b>.
+    <figure class="praat"><img class="shot" src="img/praat_05_runmenu.png" alt="The script window with the Run menu open" loading="lazy">
+      <figcaption>In the script window: <b>Run → Run</b>.</figcaption></figure>
+  </li>
+  <li>Praat asks before the script may save its results file. Click <b>Yes, I allow this script to perform the action
+    that it requests</b>. The script only writes <code>results.json</code> into this folder.
+    <figure class="mid praat"><img class="shot" src="img/praat_06_trust.png" alt="Praat's Trust window asking permission to save results.json, with Cancel, Yes I allow this script…, and Yes and I even allow… buttons" loading="lazy">
+      <figcaption>Praat’s own safety check. The middle button (“Yes, I allow…, and ask me again next time”) is enough.</figcaption></figure>
+  </li>
+  <li>Progress appears in Praat’s Info window. When it says <b>Done</b>, <code>results.json</code> is in the package folder.
+    <figure class="praat"><img class="shot" src="img/praat_08_info_done.png" alt="The Praat Info window listing each file analyzed and ending with Done" loading="lazy">
+      <figcaption>Finished. Every acoustic value comes from your Praat.</figcaption></figure>
+  </li>
+</ol>
+
+<h3 class="sub" id="ac-import"><span class="secnum">5.5</span>Import the results</h3>
+<p>Back in CART, under <b>Acoustic results (from Praat)</b>, click <span class="ui">Import results.json…</span> and choose
+  the <code>results.json</code> file from the package folder.</p>
+<figure>
+  <img class="shot" src="img/p1_15_import_button.png" alt="The Acoustic results area with the Import results.json… button highlighted" loading="lazy">
+  <figcaption><b>Import results.json…</b></figcaption>
+</figure>
+<p>CART checks the file, warns you if the file names or the speaker profile don’t match this session, and shows the
+  results by task. Step 2 now has a check mark.</p>
+<figure>
+  <img class="shot" src="img/p1_16_results.png" alt="The imported results: a table for the sustained vowels with F0, intensity, CPPS, HNR, jitter, shimmer, and formants" loading="lazy">
+  <figcaption>Results for the sustained vowels. The sentences and extemporaneous speech follow below.</figcaption>
+</figure>
+<table class="tbl">
+  <thead><tr><th>Measure</th><th>Vowels /ɑ/ and /i/</th><th>Sentences, extemporaneous speech, reading</th></tr></thead>
+  <tbody>
+    <tr><td>F0 (mean, SD)</td><td>yes</td><td>yes</td></tr>
+    <tr><td>Intensity (mean, uncalibrated dB)</td><td>yes</td><td>yes</td></tr>
+    <tr><td>CPPS</td><td>yes</td><td>yes</td></tr>
+    <tr><td>HNR, jitter, shimmer</td><td>yes</td><td>no</td></tr>
+    <tr><td>Formants F1–F3 (mean, median, SD)</td><td>yes</td><td>no</td></tr>
+  </tbody>
+</table>
+<div class="callout"><span class="ct">Note</span>
+  <p>Acoustic results are shown as soon as you import them. If you want to rate without seeing them, finish and save
+    your ratings first, then import <code>results.json</code>.</p>
+</div>
+
+<h2 class="sec" id="docs-glance"><span class="secnum">6</span>A first look at Documentation <span class="badge">optional</span></h2>
+<p>Below the acoustics, <b>3 · Documentation tools</b> writes a <b>Clinical Summary</b> and an <b>EMR Documentation
+  Draft</b> from what you entered. Both are plain text you can edit and copy into your notes with
+  <span class="ui primary">Copy to clipboard</span>. Always review them first. Part 2 covers the options here.</p>
+<figure>
+  <img class="shot" src="img/p1_17_docs_glance.png" alt="The Documentation area: Load rules file, Save rules file, Export CSV, then an empty statement list and the generated Clinical Summary text" loading="lazy">
+  <figcaption>The Clinical Summary, generated from the form and the Praat results.</figcaption>
+</figure>
+
+<h2 class="sec" id="report-full"><span class="secnum">7</span>The full report</h2>
+<p>Click <span class="ui">Report…</span> again. With acoustics imported, the report now has, in order:</p>
+<ol>
+  <li>the CAPE-Vr form, filled in;</li>
+  <li>the acoustic results, by task;</li>
+  <li>a methods paragraph, written from the settings and the Praat version in <code>results.json</code>;</li>
+  <li>the Clinical Summary and the EMR draft (untick either one in the toolbar to leave it out).</li>
+</ol>
+<div class="fig-pair">
+  <figure>
+    <img class="shot" src="img/p1_18_report_top.png" alt="The top of the report" loading="lazy">
+    <figcaption>Page 1: the CAPE-Vr form.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="img/p1_19_report_acoustics.png" alt="The acoustic analysis section of the report" loading="lazy">
+    <figcaption>Then the acoustic analysis from Praat.</figcaption>
+  </figure>
+</div>
+<figure>
+  <img class="shot" src="img/p1_20_report_print.png" alt="The report toolbar with Print / Save as PDF highlighted" loading="lazy">
+  <figcaption>The report toolbar. <b>Print / Save as PDF</b> opens your browser’s print dialog.</figcaption>
+</figure>
+
+<h3 class="sub" id="recap1">Recap of Part 1</h3>
+<ul class="check">
+  <li>Fill in the CAPE-Vr form; click <b>Save</b>. <i>(Required.)</i></li>
+  <li><i>Optional:</i> add WAVs → choose a speaker profile → <b>Make Praat package…</b></li>
+  <li><i>Optional:</i> in Praat, unzip → <b>Open Praat script…</b> → <b>Run → Run</b> → allow → <b>Done</b>.</li>
+  <li><i>Optional:</i> back in CART, <b>Import results.json…</b></li>
+  <li><b>Report…</b> → <b>Print / Save as PDF</b>.</li>
+</ul>
+
+<!-- ===================================================== PART 2 -->
+<section class="part" id="part2" data-toc="Part 2 · More options">
+  <div class="tag">Part 2 · More options <span class="optional-tag">for experienced users</span></div>
+  <div class="body">
+    <h1>Fine-tune the analysis and the documentation</h1>
+    <p>Everything here is optional, and the defaults are a sensible start. Use these sections when you want to:</p>
+    <ul>
+      <li>work across sessions, add rating lines, or handle several takes of a task;</li>
+      <li>control how Praat analyzes the recordings, or run the script on its own;</li>
+      <li>set up your clinic’s own interpretation rules;</li>
+      <li>edit and copy the Clinical Summary and EMR draft, export a CSV, or hide names.</li>
+    </ul>
+  </div>
+</section>
+
+<h2 class="sec" id="sessions"><span class="secnum">8</span>Sessions: New, Load, and Save</h2>
+<figure class="narrow">
+  <img class="shot" src="img/p2_18_session_buttons.png" alt="The session buttons at the foot of the rail: New, Load…, Save, Report…" loading="lazy">
+  <figcaption>The session buttons.</figcaption>
+</figure>
+<ul>
+  <li><span class="ui">New</span> starts an empty session. If you have unsaved changes, CART asks first.</li>
+  <li><span class="ui">Load…</span> opens a session file you saved earlier. Older session files still load.</li>
+  <li><span class="ui">Save</span> downloads the session again. Your browser may add “(1)”, “(2)” to repeated downloads;
+    the newest file is the latest.</li>
+</ul>
+<div class="callout"><span class="ct">Recordings after loading</span>
+  <p>The audio is not stored in the session file, only its details. After loading, the recordings show “Not loaded”.
+    Add the same WAV files again and they reconnect automatically.</p>
+</div>
+
+<h2 class="sec" id="form-more"><span class="secnum">9</span>More on the form</h2>
+<ul>
+  <li><b>More attributes.</b> Type a name on the blank line below Strain to rate another attribute.
+    <span class="ui">+ Add attribute</span> adds further named lines; ✕ removes one. These lines are an addition to the
+    paper form.</li>
+  <li><b>Stimuli.</b> <i>Show stimulus wording</i> shows or hides the sentence text on screen.</li>
+  <li><b>CAPE-Vr instructions.</b> The administration and scoring instructions (Table 1) are at the bottom of the
+    form, under <i>CAPE-Vr instructions</i>; click to show or hide them.</li>
+</ul>
+<figure>
+  <img class="shot" src="img/p2_01_add_attr.png" alt="The rating lines with the blank other attribute line and the + Add attribute button highlighted" loading="lazy">
+  <figcaption>The blank line for another attribute, and <b>+ Add attribute</b>.</figcaption>
+</figure>
+
+<h2 class="sec" id="takes"><span class="secnum">10</span>Recordings in depth</h2>
+<h3 class="sub" id="takes-names"><span class="secnum">10.1</span>File names and task suggestions</h3>
+<p>CART suggests each file’s task from its name. Names that contain a task label are recognized, for example:</p>
+<div class="chunk"><span class="label">task labels</span><pre>vowel_a   vowel_i
+sentence_1  sentence_2  …  sentence_6
+extemporaneous
+reading            <span class="c"># optional reading passage</span></pre></div>
+<p>If a suggestion is wrong, or there is none, choose the task from the list. Every file needs a task before you can
+  make the package.</p>
+
+<h3 class="sub" id="takes-multi"><span class="secnum">10.2</span>Several takes of one task</h3>
+<p>You can add more than one recording for a task. CART numbers the takes for you, and the package names show the
+  take number:</p>
+<div class="chunk"><span class="label">names in the package</span><pre>S001_vowel_a_t1.wav
+S001_vowel_a_t2.wav</pre></div>
+<p>Tick <b>Exclude this take</b> on a recording that shouldn’t be used (a cough, a restart). It is left out of the
+  package and the summaries, but stays in the list.</p>
+
+<h2 class="sec" id="praat-settings"><span class="secnum">11</span>Praat settings</h2>
+
+<h3 class="sub" id="ps-profiles"><span class="secnum">11.1</span>All speaker profiles</h3>
+<p><span class="ui">More options…</span> shows every speaker profile: Adult female, Adult male, Child, Trans woman,
+  Trans man, and Other / unspecified. Choosing one fills in the three values below it. You can type a different
+  value in any of them; the report and <code>results.json</code> record that you changed it.</p>
+<figure>
+  <img class="shot" src="img/p2_02_profiles.png" alt="All six speaker profiles shown, with Speaker ID for file names set to S001" loading="lazy">
+  <figcaption>All profiles, with a speaker code typed in <b>Speaker ID for file names</b>.</figcaption>
+</figure>
+<table class="tbl">
+  <thead><tr><th>Profile</th><th>Pitch floor–ceiling (Hz)</th><th>Formant ceiling (Hz)</th></tr></thead>
+  <tbody>
+    <tr><td>Adult male</td><td>75–300</td><td>5000</td></tr>
+    <tr><td>Adult female</td><td>100–500</td><td>5500</td></tr>
+    <tr><td>Child</td><td>100–600</td><td>8000</td></tr>
+    <tr><td>Trans woman, Trans man</td><td>75–500</td><td>5250</td></tr>
+    <tr><td>Other / unspecified</td><td>75–600</td><td>5250</td></tr>
+  </tbody>
+</table>
+<p class="muted" style="font-size:0.88rem">The sources for each value are listed at the top of the Praat script
+  (<code>cape_acoustics.praat</code>). The wide ranges are search ranges, not norms.</p>
+
+<h3 class="sub" id="ps-speakerid"><span class="secnum">11.2</span>Speaker ID for file names</h3>
+<p>By default, the package files are named from the Name/ID on the form. If that is a real name, type a code in
+  <b>Speaker ID for file names</b> (for example <code>S001</code>). The package, its file names, and
+  <code>results.json</code> then carry the code instead of the name.</p>
+<figure>
+  <img class="shot" src="img/p2_03_speaker_id.png" alt="The recordings list, now showing package names S001_vowel_a.wav, S001_vowel_i.wav, and so on" loading="lazy">
+  <figcaption>The package names update straight away: <code>S001_vowel_a.wav</code>, and so on.</figcaption>
+</figure>
+
+<h3 class="sub" id="ps-advanced"><span class="secnum">11.3</span>Advanced analysis settings</h3>
+<p>Open <b>Advanced analysis settings (optional)</b> to choose how Praat measures. Each choice is written into the
+  package’s settings file, echoed in <code>results.json</code>, and listed in the report’s methods paragraph.</p>
+<figure>
+  <img class="shot" src="img/p2_04_advanced.png" alt="Advanced analysis settings: CPPS method, voiced parts only, intensity averaging, HNR method, jitter and shimmer measures, period range, formants, stereo files, vowel window" loading="lazy">
+  <figcaption>Advanced analysis settings. Here, extra jitter (rap, ppq5) and shimmer (apq3, apq11) measures are switched on.</figcaption>
+</figure>
+<table class="tbl">
+  <thead><tr><th>Setting</th><th>Choices <span class="muted">(default first)</span></th></tr></thead>
+  <tbody>
+    <tr><td>CPPS method</td><td>Maryn &amp; Weenink (2015) · Praat 7.0.02 defaults</td></tr>
+    <tr><td>CPPS / intensity on speech: voiced parts only</td><td>Yes · No</td></tr>
+    <tr><td>Intensity averaging</td><td>Energy · dB</td></tr>
+    <tr><td>HNR method</td><td>Cross-correlation (cc) · Autocorrelation (ac)</td></tr>
+    <tr><td>Jitter measures</td><td>local (default) · also local absolute, rap, ppq5, ddp</td></tr>
+    <tr><td>Shimmer measures</td><td>local and local dB (default) · also apq3, apq5, apq11, dda</td></tr>
+    <tr><td>Jitter/shimmer period range</td><td>From the pitch range · Fixed (0.0001–0.02 s)</td></tr>
+    <tr><td>Formants</td><td>Whole analysis window (mean, median, SD) · Midpoint only</td></tr>
+    <tr><td>Stereo files</td><td>Average the channels · Left channel only</td></tr>
+    <tr><td>Vowel window</td><td>The middle 3 s of the voiced part; for shorter vowels, the middle 50%</td></tr>
+    <tr><td>Number of formants tracked</td><td>5</td></tr>
+  </tbody>
+</table>
+
+<h3 class="sub" id="ps-rerun"><span class="secnum">11.4</span>Changed a setting? Run it again</h3>
+<p>Settings take effect only in a new package. After changing any of them:</p>
+<ol class="steps">
+  <li>Click <span class="ui primary">Make Praat package…</span> again and download it.</li>
+  <li>Unzip it and run it in Praat exactly as in section 5.4.</li>
+  <li>Import the new <code>results.json</code>. It replaces the earlier results.</li>
+</ol>
+<figure>
+  <img class="shot" src="img/p2_06_results_extra.png" alt="The vowel results table now including Jitter (rap), Jitter (ppq5), Shimmer (apq3) and Shimmer (apq11)" loading="lazy">
+  <figcaption>After the re-run, the extra jitter and shimmer measures appear.</figcaption>
+</figure>
+
+<h3 class="sub" id="ps-inside"><span class="secnum">11.5</span>Inside the package</h3>
+<p>You never need to edit these files, but it helps to know what they hold. The settings file is a simple two-column
+  table that the script reads:</p>
+<div class="chunk"><span class="label">cape_settings.tsv (excerpt)</span><pre><span class="k">name</span>                  <span class="k">value</span>
+speakerID             <span class="s">S001</span>
+speakerProfile        <span class="s">adult_male</span>
+pitchFloorHz          <span class="s">75</span>
+pitchCeilingHz        <span class="s">300</span>
+formantCeilingHz      <span class="s">5000</span>
+cppsMethod            <span class="s">maryn_weenink_2015</span>
+hnrMethod             <span class="s">cc</span>
+jitterMeasures        <span class="s">local,rap,ppq5</span>
+shimmerMeasures       <span class="s">local,local_db,apq3,apq11</span></pre></div>
+<p>Praat writes <code>results.json</code>. It records the Praat version, the date, every setting, and each file with
+  its measures:</p>
+<div class="chunk"><span class="label">results.json (excerpt)</span><pre>{
+  <span class="k">"praatVersion"</span>: <span class="s">"7.0.02"</span>,
+  <span class="k">"speakerID"</span>: <span class="s">"S001"</span>,
+  <span class="k">"speakerProfile"</span>: <span class="s">"adult_male"</span>,
+  <span class="k">"settings"</span>: { … },
+  <span class="k">"files"</span>: [
+    {
+      <span class="k">"fileName"</span>: <span class="s">"S001_extemporaneous.wav"</span>,
+      <span class="k">"task"</span>: <span class="s">"extemporaneous"</span>,
+      <span class="k">"status"</span>: <span class="s">"analyzed"</span>,
+      <span class="k">"measures"</span>: {
+        <span class="k">"f0Mean"</span>:        { "value": 92.16, "unit": "Hz", "reason": null },
+        <span class="k">"intensityMean"</span>: { "value": 73.30, "unit": "dB (uncalibrated)", "reason": null },
+        <span class="k">"cpps"</span>:          { "value": 10.70, "unit": "dB", "reason": null }
+      }
+    }, …
+  ],
+  <span class="k">"unrecognizedFiles"</span>: [],
+  <span class="k">"missingTasks"</span>: [],
+  <span class="k">"warnings"</span>: []
+}</pre></div>
+<ul>
+  <li>A measure Praat could not compute is written as <code>null</code> with a <code>reason</code>, never as 0.</li>
+  <li>Files whose names don’t match a task are listed under <code>unrecognizedFiles</code>; nothing is skipped silently.</li>
+  <li>Intensity is relative (uncalibrated dB), not sound pressure level.</li>
+</ul>
+<details class="fold">
+  <summary>Show the script window in Praat</summary>
+  <div class="fold-body">
+    <p>The top of <code>cape_acoustics.praat</code> explains how to run it and lists every setting, its default, and its source.</p>
+    <figure class="praat"><img class="shot" src="img/praat_04_editor.png" alt="The Praat script window showing the script's header comments: how to run, file names, settings and sources" loading="lazy">
+      <figcaption>The script’s own instructions, at the top of the script window.</figcaption></figure>
+  </div>
+</details>
+
+<h3 class="sub" id="ps-standalone"><span class="secnum">11.6</span>Running the script without CART</h3>
+<p>The Praat script also works on its own, for example on a folder of recordings that was never in CART:</p>
+<ol class="steps">
+  <li>Put <code>cape_acoustics.praat</code> (in CART’s <code>praat/</code> folder) and your WAV files in one folder.
+    Name the files <code>&lt;speakerID&gt;_&lt;task&gt;.wav</code>, or <code>&lt;speakerID&gt;_&lt;task&gt;_t2.wav</code> for a
+    second take.</li>
+  <li>Run it in Praat as in section 5.4. With no <code>cape_settings.tsv</code> in the folder, one dialog asks for the
+    speaker ID and profile, and every other setting uses its default.</li>
+  <li>To set other options by hand, copy <code>praat/cape_settings_template.tsv</code> into the folder, rename it
+    <code>cape_settings.tsv</code>, and edit the values.</li>
+</ol>
+
+<h2 class="sec" id="rules"><span class="secnum">12</span>Clinic-defined interpretation rules</h2>
+<p>Open <b>3 · Documentation tools</b>, then <b>Interpretation Rules</b>. Rules let your clinic turn scores and Praat
+  values into wording for the Clinical Summary and EMR draft.</p>
+
+<h3 class="sub" id="rules-why"><span class="secnum">12.1</span>Why every rule starts empty</h3>
+<figure>
+  <img class="shot" src="img/p2_07_rules_empty.png" alt="The Interpretation Rules area: an orange note explaining that rules are clinic-defined and not part of the CAPE-Vr, then an empty Severity ranges table with grey placeholder numbers" loading="lazy">
+  <figcaption>Interpretation Rules, empty, with the note that explains them.</figcaption>
+</figure>
+<ul>
+  <li>The CAPE-Vr removed the mild/moderate/severe labels from the form on purpose, because such labels act as
+    anchors and bias ratings. CART therefore ships with <b>no categories and no cut-offs</b>.</li>
+  <li>A rule is used <b>as soon as it is filled in</b>. To stop using it, clear its values.</li>
+  <li>Grey numbers are placeholders only. <span class="ui">Fill in example values</span> copies them in, after asking you
+    to confirm: they have no published source, so your clinic should review and change them.</li>
+  <li>Rules appear only here, below the form, never on the rating form itself.</li>
+</ul>
+<p>There are four kinds of rule.</p>
+
+<h3 class="sub" id="rules-sev"><span class="secnum">12.2</span>Severity ranges</h3>
+<p>Your clinic’s own ranges and labels for Overall Severity, applied after rating.</p>
+<figure>
+  <img class="shot" src="img/p2_08_rule_severity.png" alt="Severity ranges filled with example values: 0–24 mild, 25–49 mild-to-moderate, 50–74 moderate-to-severe, 75–100 severe; Active: 4 ranges" loading="lazy">
+  <figcaption>Severity ranges, filled in with the example values for this demo. “Active” confirms the rule is used.</figcaption>
+</figure>
+
+<h3 class="sub" id="rules-rank"><span class="secnum">12.3</span>Perceptual feature ranking</h3>
+<p>Names the primary, secondary, and tertiary features by score, from the attributes you tick. An attribute is named
+  only if it reaches the minimum score; the tie margin names close scores together.</p>
+<figure>
+  <img class="shot" src="img/p2_09_rule_ranking.png" alt="Perceptual feature ranking with Roughness, Breathiness and Strain ticked, 3 ranks, minimum score 10; Active" loading="lazy">
+  <figcaption>Ranking three attributes, minimum score 10.</figcaption>
+</figure>
+
+<h3 class="sub" id="rules-desc"><span class="secnum">12.4</span>Attribute descriptors</h3>
+<p>Turns a score range into wording, such as “Breathiness present”.</p>
+<figure>
+  <img class="shot" src="img/p2_10_rule_descriptors.png" alt="Attribute descriptors with example ranges 1–15 minimally present and 16–100 present" loading="lazy">
+  <figcaption>Attribute descriptors with the example values.</figcaption>
+</figure>
+
+<h3 class="sub" id="rules-ref"><span class="secnum">12.5</span>Clinic reference values</h3>
+<p>A reference value, a condition (below or above), and the sentence to write. Allowed only for the threshold-based
+  measures: <b>CPPS, HNR, jitter, and shimmer</b>. F0, intensity, and formants are never interpreted.</p>
+<figure>
+  <img class="shot" src="img/p2_11_rule_reference.png" alt="Clinic Reference Values: CPPS connected speech, 12 dB, Below reference value, with a generated sentence; Active" loading="lazy">
+  <figcaption>A reference value for CPPS in connected speech. The 12 dB here is a demo number, not a published cut-off.</figcaption>
+</figure>
+<div class="callout caution"><span class="ct">Caution</span>
+  <p>A reference value only makes sense for the analysis settings it was set with (measure, CPPS method, task). CART records
+    the settings when you enter a value, and warns you if later results were made with different settings.</p>
+</div>
+
+<h3 class="sub" id="rules-file"><span class="secnum">12.6</span>Share one set of rules</h3>
+<p><span class="ui">Save rules file</span> downloads your rules; <span class="ui">Load rules file…</span> loads them,
+  so a whole clinic can use the same set. A copy of the rules is also kept in each session file.</p>
+<div class="chunk"><span class="label">rules file</span><pre>rules_Demo-Voice-Clinic_2026-11-10.json</pre></div>
+<figure>
+  <img class="shot" src="img/p2_12_rules_file.png" alt="The Documentation header with the Save rules file button highlighted" loading="lazy">
+  <figcaption>The rules-file buttons at the top of Documentation.</figcaption>
+</figure>
+
+<h2 class="sec" id="summary"><span class="secnum">13</span>Statements, Clinical Summary, and EMR draft</h2>
+<h3 class="sub" id="sum-statements"><span class="secnum">13.1</span>Statements and “why?”</h3>
+<p>Each filled-in rule produces <b>statements</b>, and each statement shows its value. Click <b>why?</b> to see the
+  exact rule and value behind it. Ticked statements (all, by default) go into the Clinical Summary and EMR draft; untick
+  any you don’t want.</p>
+<figure>
+  <img class="shot" src="img/p2_13_statements_why.png" alt="Statements from the clinic's rules, each ticked, with one why? opened showing Overall Severity = 34/100 and the rule 25–49 → mild-to-moderate" loading="lazy">
+  <figcaption>Statements, with one “why?” open: the value (34/100) and the rule that produced the wording.</figcaption>
+</figure>
+
+<h3 class="sub" id="sum-text"><span class="secnum">13.2</span>Edit and copy the texts</h3>
+<p>The <b>Clinical Summary</b> and the <b>EMR Documentation Draft</b> update automatically until you edit them yourself.
+  Under each, <i>Why does the text say this?</i> lists every generated line and its source.
+  <span class="ui primary">Copy to clipboard</span> copies the text to paste into your notes.</p>
+<div class="fig-pair">
+  <figure>
+    <img class="shot" src="img/p2_14_summary.png" alt="The Clinical Summary text with the rule statements included" loading="lazy">
+    <figcaption>Clinical Summary.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="img/p2_15_emr.png" alt="The EMR Documentation Draft text" loading="lazy">
+    <figcaption>EMR Documentation Draft.</figcaption>
+  </figure>
+</div>
+<p>Under the rules, <b>Acoustic values in the Clinical Summary and EMR draft</b> chooses which Praat measures and tasks appear in
+  the texts. With several takes of a task, or several tasks, you can show each value or their <b>mean</b>. A mean is always labeled as a mean,
+  with the number of values and the files used; vowels and connected speech are never averaged together.</p>
+<div class="callout caution"><span class="ct">Caution</span>
+  <p>Generated text is rule-based and is not a diagnosis. Review and edit it before clinical use.</p>
+</div>
+
+<h2 class="sec" id="csv"><span class="secnum">14</span>CSV export</h2>
+<p><span class="ui">Export CSV</span> writes one row per evaluation (session details, every score, every acoustic value,
+  and the rule outputs), for spreadsheets or research. Tick <b>CSV without names</b> to leave out the name, examiner, rater,
+  and original file names.</p>
+<figure>
+  <img class="shot" src="img/p2_16_csv.png" alt="The Documentation header with Export CSV highlighted and CSV without names ticked" loading="lazy">
+  <figcaption><b>Export CSV</b>, here with <b>CSV without names</b> ticked.</figcaption>
+</figure>
+<div class="chunk"><span class="label">CSV file</span><pre>S001_capevr_2026-11-10_names-hidden.csv</pre></div>
+
+<h2 class="sec" id="privacy"><span class="secnum">15</span>Report privacy options</h2>
+<p>In the report toolbar, under <b>Privacy</b>:</p>
+<ul>
+  <li><b>Hide names</b> replaces Name/ID with the speaker code (from section 11.2) and hides the original file names.
+    If no speaker code was typed, Name/ID shows [removed].</li>
+  <li><b>Hide examiner and rater</b> removes those two names.</li>
+  <li><b>Include:</b> untick <i>Clinical Summary</i> or <i>EMR draft</i> to leave them out of the report.</li>
+</ul>
+<figure>
+  <img class="shot" src="img/p2_17_report_privacy.png" alt="The report with Hide names and Hide examiner and rater ticked: Name/ID shows S001 and Examiner and Rater show [removed]" loading="lazy">
+  <figcaption>With both privacy options ticked: Name/ID shows S001, and the examiner and rater show [removed].</figcaption>
+</figure>
+<div class="callout caution"><span class="ct">Caution</span>
+  <p>This is not a full de-identification. Dates, age, gender, and free text (including the Clinical Summary and EMR
+    draft) are unchanged. Check them before sharing.</p>
+</div>
+
+<h3 class="sub" id="recap2">Recap of Part 2</h3>
+<ul class="check">
+  <li>Speaker profiles and <b>Advanced analysis settings</b> control Praat; re-make the package after any change.</li>
+  <li><b>Speaker ID for file names</b> keeps names out of the package and results.</li>
+  <li>Interpretation rules start empty; your clinic fills them in; <b>why?</b> shows the rule and value behind each statement.</li>
+  <li>The Clinical Summary and EMR draft are editable and copyable; review them before use.</li>
+  <li><b>CSV without names</b> and the report’s <b>Privacy</b> options hide names, but are not full de-identification.</li>
+</ul>
+
+<!-- ===================================================== PART 3 -->
+<section class="part" id="part3" data-toc="Part 3 · Use CART offline">
+  <div class="tag">Part 3 · Use CART offline</div>
+  <div class="body">
+    <h1>Download CART once, use it without internet</h1>
+    <p>CART is a set of plain files. Download them once from GitHub, and you can open CART from your own computer
+      at any time, with no internet connection and nothing to install.</p>
+  </div>
+</section>
+
+<h2 class="sec" id="download"><span class="secnum">16</span>Download CART from GitHub</h2>
+<ol class="steps">
+  <li>Open the CART repository: <a href="https://github.com/maypychan/CART">github.com/maypychan/CART</a>.
+    You don’t need a GitHub account.
+    <figure><img class="shot" src="img/p3_01_github_repo.png" alt="The CART repository page on GitHub, listing folders css, docs, js, praat, tools, vendor and files including index.html" loading="lazy">
+      <figcaption>The CART repository on GitHub.</figcaption></figure>
+  </li>
+  <li>Click the green <b>Code</b> button, then <b>Download ZIP</b>.
+    <figure><img class="shot" src="img/p3_02_github_code_menu.png" alt="The Code menu open on GitHub, with Download ZIP highlighted" loading="lazy">
+      <figcaption><b>Code → Download ZIP</b>. (You can ignore the Clone options.)</figcaption></figure>
+  </li>
+  <li>Your browser saves <code>CART-main.zip</code>, usually in your Downloads folder.</li>
+</ol>
+
+<h2 class="sec" id="unzip"><span class="secnum">17</span>Unzip it and keep it somewhere safe</h2>
+<div class="tabset">
+  <div role="tablist" aria-label="Your computer">
+    <button type="button" role="tab">Windows</button>
+    <button type="button" role="tab">macOS</button>
+  </div>
+  <div role="tabpanel">
+    <ol class="steps">
+      <li>Open your Downloads folder in File Explorer.</li>
+      <li>Right-click <code>CART-main.zip</code> → <b>Extract All…</b> → choose a folder (for example your
+        Documents folder) → <b>Extract</b>.</li>
+      <li>Open the new <code>CART-main</code> folder.</li>
+    </ol>
+    <div class="callout caution"><span class="ct">Caution</span>
+      <p>Windows lets you look inside a .zip without extracting it. Opening <code>index.html</code> from there
+        does not work properly, because the other files are left behind. Always <b>Extract All…</b> first.</p>
+    </div>
+  </div>
+  <div role="tabpanel">
+    <ol class="steps">
+      <li>Open your Downloads folder in Finder.</li>
+      <li>Double-click <code>CART-main.zip</code>. A <code>CART-main</code> folder appears next to it.
+        (Safari may already have unzipped it for you.)</li>
+      <li>Drag the <code>CART-main</code> folder to where you want to keep it, for example Documents.</li>
+    </ol>
+  </div>
+</div>
+<p>The folder looks like this. Keep everything together; CART needs all of it.</p>
+<div class="chunk"><span class="label">CART-main/</span><pre><span class="k">CART-main/</span>
+  <b>index.html</b>             <span class="c"># ← open this</span>
+  README.md
+  <span class="k">css/</span>                   <span class="c"># styles</span>
+  <span class="k">js/</span>                    <span class="c"># the program</span>
+  <span class="k">praat/</span>                 <span class="c"># cape_acoustics.praat and a settings template</span>
+  <span class="k">vendor/</span>                <span class="c"># the font</span>
+  <span class="k">docs/</span>                  <span class="c"># QUICK_START.md</span>
+  <span class="k">tutorial/</span>              <span class="c"># this tutorial</span>
+  <span class="k">tools/</span>                 <span class="c"># for developers only</span></pre></div>
+
+<h2 class="sec" id="open-offline"><span class="secnum">18</span>Open CART from your computer</h2>
+<div class="tabset">
+  <div role="tablist" aria-label="Your computer">
+    <button type="button" role="tab">Windows</button>
+    <button type="button" role="tab">macOS</button>
+  </div>
+  <div role="tabpanel">
+    <p>Double-click <code>index.html</code>. It opens in your default browser.</p>
+    <p>To use Chrome or Edge instead: right-click <code>index.html</code> → <b>Open with</b> → <b>Google Chrome</b> or
+      <b>Microsoft Edge</b>.</p>
+  </div>
+  <div role="tabpanel">
+    <p>Double-click <code>index.html</code>. It opens in your default browser (often Safari).</p>
+    <p>To use Chrome or Edge instead: right-click (or Control-click) <code>index.html</code> → <b>Open With</b> →
+      <b>Google Chrome</b>.</p>
+  </div>
+</div>
+<p>CART looks and works exactly as in Part 1. The address bar shows a file address instead of a web address, which is
+  how you can tell CART is running from your own computer:</p>
+<div class="chunk"><span class="label">address bar</span><pre>file:///C:/Users/you/Documents/CART-main/index.html      <span class="c"># Windows</span>
+file:///Users/you/Documents/CART-main/index.html         <span class="c"># macOS</span></pre></div>
+<div class="callout tip"><span class="ct">Tip</span>
+  <ul>
+    <li>Bookmark the page in your browser, or make a desktop shortcut to <code>index.html</code>, so CART is one click away.</li>
+    <li>You can now switch off Wi-Fi: CART still works. It never needed the internet; it makes no network requests.</li>
+  </ul>
+</div>
+
+<h2 class="sec" id="praat-install"><span class="secnum">19</span>Install Praat <span class="badge">only for acoustics</span></h2>
+<p>If you will use the acoustic analysis, download Praat from <a href="https://www.praat.org">praat.org</a> and install it as
+  its website describes. Praat is separate, free software by Paul Boersma and David Weenink; CART does not include it.
+  Version 7.0.02 was used for testing. Once installed, Praat also works without internet.</p>
+<div class="callout"><span class="ct">Note</span>
+  <p>CART has been tested in Chrome, with Praat 7.0.02 on Windows. Firefox, Safari, and Praat on macOS have not been
+    tested yet.</p>
+</div>
+
+<h2 class="sec" id="update"><span class="secnum">20</span>Updating to a new version</h2>
+<ol class="steps">
+  <li>Download the ZIP again (section 16) and unzip it.</li>
+  <li>Replace your old <code>CART-main</code> folder with the new one, or keep both side by side.</li>
+</ol>
+<p>Your sessions, reports, rules files, and CSV files are separate files that you saved yourself, so updating CART never
+  touches them. Load them into the new version as usual.</p>
+
+<h2 class="sec" id="faq"><span class="secnum">21</span>Troubleshooting</h2>
+<details class="fold">
+  <summary>CART opens, but it looks unstyled or nothing works</summary>
+  <div class="fold-body"><p>The other files are missing. Make sure you extracted the whole ZIP (Windows: <b>Extract All…</b>)
+    and that <code>index.html</code> is still inside the <code>CART-main</code> folder next to <code>css/</code> and <code>js/</code>.</p></div>
+</details>
+<details class="fold">
+  <summary>Where is my data stored?</summary>
+  <div class="fold-body"><p>Only in the files you save: sessions, reports, packages, rules files, and CSV files. Nothing is kept
+    in the browser and nothing is sent anywhere.</p></div>
+</details>
+<details class="fold">
+  <summary>I loaded a session and the recordings say “Not loaded”</summary>
+  <div class="fold-body"><p>The audio isn’t stored in the session file. Add the same WAV files again and they reconnect.</p></div>
+</details>
+<details class="fold">
+  <summary>Praat says the script failed</summary>
+  <div class="fold-body"><p>Check that the package was unzipped, that every file from it is in one folder, and that you are
+    using a recent Praat (7.0.02 was tested). Keep a note of the message Praat shows.</p></div>
+</details>
+<details class="fold">
+  <summary>The import warns that file names or the speaker profile don’t match</summary>
+  <div class="fold-body"><p>The <code>results.json</code> is probably from a different package or an older run. Import the
+    <code>results.json</code> from the package you made for this session, or re-make the package and run it again.</p></div>
+</details>
+<details class="fold">
+  <summary>Does CART diagnose, or tell me what’s normal?</summary>
+  <div class="fold-body"><p>No. It organizes and documents your evaluation. Any categories or reference values come only from
+    rules your clinic defines.</p></div>
+</details>
+
+<!-- ===================================================== Tutorial info (like sessionInfo()) -->
+<h2 class="sec" id="info"><span class="secnum">22</span>Tutorial information</h2>
+<dl class="info-grid">
+  <dt>CART</dt><dd>version 0.1.0</dd>
+  <dt>Praat</dt><dd>7.0.02, Windows (screenshots and results)</dd>
+  <dt>Browser</dt><dd>Google Chrome, 1280 × 760 window</dd>
+  <dt>Demo data</dt><dd>fictional speaker “Jordan Example” (speaker code S001); synthetic WAV recordings made in Praat</dd>
+  <dt>Example rules</dt><dd>placeholder values for demonstration only; not published cut-offs</dd>
+  <dt>Also available</dt><dd>a captioned <a href="https://www.youtube.com/playlist?list=PLdwLkAt6EnWw">walkthrough video on YouTube</a> (Parts 1 and 2), and <code>docs/QUICK_START.md</code> inside CART</dd>
+</dl>
+
+<footer class="foot">
+  <p>CART is an independent tool and is not affiliated with or endorsed by the CAPE-Vr or CAPE-V authors, ASHA, The Voice
+    Foundation, or Elsevier. CAPE-Vr form content in the screenshots is adapted from Kempster, Nagle &amp; Solomon (2025),
+    <i>Journal of Voice</i>, doi:10.1016/j.jvoice.2025.01.022, under the
+    <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License (CC BY 4.0)</a>.
+    Praat is separate software by P. Boersma and D. Weenink.</p>
+  <p>CART is a documentation and reporting aid. It does not diagnose disorders and does not replace clinical judgment.</p>
+</footer>
+
+</main>
+</div>
+
+<button type="button" class="back-top">↑ Top</button>
+<script src="js/tutorial.js"></script>
+</body>
+</html>

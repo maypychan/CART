@@ -74,7 +74,7 @@ complete.
     reference values are clinic-defined.
   - Each rule statement can be unticked to leave it out of the texts.
   - Rule sets can be shared as files.
-  - The texts can be copied once the session has been saved.
+  - The texts can be copied at any time.
 - **Exports:** the session (JSON), the Praat package (ZIP), the report
   (print or PDF), and a CSV with one row per evaluation. "Hide names"
   options are available.
@@ -187,6 +187,10 @@ If you use CART in research, please cite:
 ### Acoustic-analysis software
 - Boersma P, Weenink D. *Praat: doing phonetics by computer* (version used).
 ### CART Software
-- Chan MPY, *CART (CAPE-Vr Clinical Acoustic Reporting Tool)*. Version 1.0. GitHub repository, 2026. https://maypychan.github.io/CART/
+- Chan MPY, *CART (CAPE-Vr Clinical Acoustic Reporting Tool)*. Version 0.1.0. GitHub repository, 2026. https://github.com/maypychan/CART
+
+Citation details for CART are also in [`CITATION.cff`](CITATION.cff). On
+GitHub, the **Cite this repository** button on the repository page uses this
+file to give the citation in APA and BibTeX formats.
 
 The report's methods paragraph lists the Praat version and every analysis setting used.
